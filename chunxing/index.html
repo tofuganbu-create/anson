@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《春兴》多媒体互动课件</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght=400;700;900&family=ZCOOL+KuaiLe&display=swap');
+        
+        .font-han {
+            font-family: 'Noto Serif SC', serif;
+        }
+        .font-child {
+            font-family: 'ZCOOL KuaiLe', sans-serif;
+        }
+
+        /* 树木摇晃动画 */
+        @keyframes tree-wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-4deg); }
+            40% { transform: rotate(3deg); }
+            60% { transform: rotate(-3deg); }
+            80% { transform: rotate(2deg); }
+        }
+        .animate-shake {
+            animation: tree-wiggle 0.8s ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        /* 柳枝摆动动画 */
+        @keyframes sway-slow {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+        @keyframes sway-mid {
+            0%, 100% { transform: rotate(-4deg); }
+            50% { transform: rotate(4deg); }
+        }
+        @keyframes sway-fast {
+            0%, 100% { transform: rotate(-6deg); }
+            50% { transform: rotate(6deg); }
+        }
+        .sway-1 { animation: sway-slow 4s ease-in-out infinite; transform-origin: top center; }
+        .sway-2 { animation: sway-mid 3s ease-in-out infinite; transform-origin: top center; }
+        .sway-3 { animation: sway-fast 2.5s ease-in-out infinite; transform-origin: top center; }
+
+        /* 雨滴落下动画 */
+        @keyframes fall {
+            to { transform: translateY(100%); }
+        }
+        .rain-drop {
+            position: absolute;
+            background: linear-gradient(transparent, rgba(173, 216, 230, 0.7));
+            width: 2px;
+            height: 15px;
+            opacity: 0.7;
+            animation: fall 1.2s linear infinite;
+        }
+
+        /* 花瓣飘落动画 */
+        @keyframes leaf-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(220px) translateX(var(--drift)) rotate(360deg); opacity: 0; }
+        }
+        .petal {
+            position: absolute;
+            animation: leaf-fall 2.5s linear forwards;
+            pointer-events: none;
+        }
+
+        /* 黄莺飞舞动画 */
+        @keyframes bird-fly-left {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            30% { transform: translate(-30px, -40px) scale(0.6) rotate(-10deg); opacity: 1; }
+            70% { transform: translate(-80px, -65px) scale(1.1) rotate(10deg); }
+            100% { transform: translate(-120px, -50px) scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes bird-fly-right {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            30% { transform: translate(30px, -30px) scale(0.6) rotate(10deg); opacity: 1; }
+            70% { transform: translate(80px, -60px) scale(1.1) rotate(-10deg); }
+            100% { transform: translate(130px, -45px) scale(1) rotate(0deg); opacity: 1; }
+        }
+        .fly-left {
+            animation: bird-fly-left 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        .fly-right {
+            animation: bird-fly-right 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        /* 简单的气球漂移效果 */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .float-bubble {
+            animation: float-slow 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/40 text-stone-800 min-h-screen flex flex-col items-center justify-between font-sans overflow-x-hidden pb-6">
+
+    <!-- 顶部标题与导航栏 -->
+    <header class="w-full max-w-2xl bg-white/80 backdrop-blur border-b border-stone-200/60 sticky top-0 z-50 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+            <a href="../index.html" class="flex items-center space-x-1 text-stone-600 hover:text-emerald-700 bg-stone-100/80 hover:bg-stone-200/50 active:scale-95 transition-all px-3 py-1.5 rounded-full text-xs font-bold font-child border border-stone-200/40">
+                <span>🏠</span>
+                <span>返回主页</span>
+            </a>
+            <div class="flex items-center space-x-2 border-l border-stone-200 pl-3">
+                <span class="text-2xl">🌸</span>
+                <div>
+                    <h1 class="text-lg font-bold text-stone-900 font-han">少儿国学馆</h1>
+                    <p class="text-xs text-stone-500 font-child">古诗《春兴》趣学课件</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-1 bg-amber-100/60 rounded-full px-2.5 py-1 text-xs font-bold text-amber-800">
+            <span>主讲人：古诗老师</span>
+        </div>
+    </header>
+
+    <!-- 主展示区 -->
+    <main class="w-full max-w-md px-4 flex-1 flex flex-col justify-center py-4">
+
+        <!-- 第一页：课件封面 -->
+        <section id="slide-1" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-100 flex flex-col h-[520px] transition-all duration-300">
+            <!-- 意境图背景（优先加载01.png，加载失败则用唯美国风底色替代） -->
+            <div class="relative w-full h-56 bg-gradient-to-b from-sky-100 to-amber-50 flex items-center justify-center overflow-hidden">
+                <img id="cover-img" src="01.png" alt="春兴意境图" class="w-full h-full object-cover transition-opacity duration-300" onerror="this.style.display='none'; document.getElementById('cover-fallback').classList.remove('hidden');">
+                <!-- 备用国风插画 -->
+                <div id="cover-fallback" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-teal-50 to-amber-50">
+                    <span class="text-6xl mb-2 animate-bounce">🎨</span>
+                    <span class="font-han font-bold text-xl text-stone-700">《春兴》古诗课件</span>
+                    <span class="text-xs text-stone-400 mt-1">请在根目录下放置 01.png 意境图以呈现完美水墨效果</span>
+                </div>
+                <!-- 诗句飘带 -->
+                <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md border border-amber-100">
+                    <span class="text-xs font-bold text-amber-800">唐 · 武元衡</span>
+                </div>
+            </div>
+            
+            <div class="p-6 flex-1 flex flex-col justify-between text-center">
+                <div>
+                    <h2 class="text-3xl font-black text-amber-900 font-han tracking-wider mb-2">春兴</h2>
+                    <p class="text-sm text-stone-500 font-child max-w-xs mx-auto mb-4">
+                        当春天悄悄要走的时候，诗人在梦里坐着春风回到了家乡……
+                    </p>
+                    <div class="space-y-1 font-han font-bold text-base text-stone-700">
+                        <p>杨柳阴阴细雨晴，残花落尽见流莺。</p>
+                        <p>春风一夜吹乡梦，又逐春风到洛城。</p>
+                    </div>
+                </div>
+
+                <button onclick="changeSlide(2)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-child text-lg font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center space-x-2">
+                    <span>🌟 点击开始探索诗意</span>
+                    <span class="text-xl">➔</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 第二页：第一句“杨柳阴阴细雨晴” -->
+        <section id="slide-2" class="hidden bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-100 flex flex-col h-[520px] transition-all duration-300">
+            <div class="p-4 bg-teal-50/50 border-b border-stone-100">
+                <span class="text-xs font-bold text-teal-700 bg-teal-100/80 px-2 py-0.5 rounded-full font-child">第一句 · 雨过天晴</span>
+                <h3 class="text-xl font-bold font-han mt-1 text-stone-800">杨柳阴阴细雨晴</h3>
+            </div>
+
+            <!-- 雨中柳树互动区 -->
+            <div class="relative w-full h-48 bg-gradient-to-b from-sky-100/60 to-emerald-50/30 flex items-center justify-center overflow-hidden" id="rain-area">
+                <!-- 下雨画布 -->
+                <div id="rain-container" class="absolute inset-0 pointer-events-none"></div>
+                <!-- 太阳 (默认晴天显示) -->
+                <div id="sun-element" class="absolute top-4 right-6 text-4xl animate-spin transition-all duration-1000 transform scale-0" style="animation-duration: 20s;">☀️</div>
+                <!-- 彩虹 (晴天显示) -->
+                <div id="rainbow-element" class="absolute top-2 left-6 text-3xl opacity-0 transition-opacity duration-1000">🌈</div>
+
+                <!-- 柳树 SVG (带有手绘感和摇摆动画) -->
+                <svg id="willow-tree" onclick="splashDew()" class="w-44 h-44 cursor-pointer select-none transition-all duration-500 hover:scale-105 active:scale-95 z-10" viewBox="0 0 200 200">
+                    <!-- 树干 -->
+                    <path d="M90 190 Q105 140 100 110" stroke="#795548" stroke-width="8" stroke-linecap="round" fill="none" />
+                    <path d="M100 110 Q85 80 75 70" stroke="#795548" stroke-width="4" stroke-linecap="round" fill="none" />
+                    <path d="M100 110 Q115 80 125 75" stroke="#795548" stroke-width="4" stroke-linecap="round" fill="none" />
+                    
+                    <!-- 垂挂柳枝组合 -->
+                    <g id="willow-branches">
+                        <!-- 第一组：慢摆 -->
+                        <g class="sway-1">
+                            <path d="M75 70 Q60 100 65 140" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="1,5" />
+                            <path d="M75 70 Q50 90 45 125" stroke="#81C784" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="1,4" />
+                        </g>
+                        <!-- 第二组：中摆 -->
+                        <g class="sway-2">
+                            <path d="M125 75 Q140 100 135 145" stroke="#4CAF50" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="1,5" />
+                            <path d="M125 75 Q150 90 155 120" stroke="#388E3C" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="1,4" />
+                        </g>
+                        <!-- 第三组：快摆 -->
+                        <g class="sway-3">
+                            <path d="M100 80 Q100 110 95 150" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="1,5" />
+                        </g>
+                    </g>
+                </svg>
+
+                <!-- 水滴溅落容器 -->
+                <div id="dew-container" class="absolute inset-0 pointer-events-none z-20"></div>
+            </div>
+
+            <!-- 说明与互动面板 -->
+            <div class="p-5 flex-1 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="bg-teal-50/60 border border-teal-100 p-3 rounded-xl flex items-start space-x-2">
+                        <span class="text-xl">💡</span>
+                        <div class="text-xs text-stone-600 leading-relaxed">
+                            <strong class="text-teal-800 font-child block mb-0.5">小朋友翻译机：</strong>
+                            春雨刚下完，天空放晴啦！一排排茂密的杨柳树在柔和的春光里摆动，翠绿水灵，好看极了。
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50">
+                            <span class="font-bold text-amber-800">杨柳阴阴：</span> 柳树长得很茂盛，树荫浓厚。
+                        </div>
+                        <div class="bg-sky-50/50 p-2 rounded-lg border border-sky-100/50">
+                            <span class="font-bold text-sky-800">细雨晴：</span> 淅淅沥沥的春雨刚停。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互按钮区域 -->
+                <div class="space-y-2">
+                    <button onclick="toggleRain()" id="rain-btn" class="w-full py-2.5 px-4 bg-sky-600 text-white rounded-xl font-child text-sm font-bold shadow-md active:scale-95 transition-all flex items-center justify-center space-x-1.5">
+                        <span>🌧️ 拨开云雾：让雨停下</span>
+                    </button>
+                    
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="changeSlide(1)" class="text-xs font-bold text-stone-400 hover:text-stone-600 px-3 py-1.5">❮ 返回封面</button>
+                        <button onclick="changeSlide(3)" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">下一句：摇晃桃树 ➔</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第三页：第二句“残花落尽见流莺” -->
+        <section id="slide-3" class="hidden bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-100 flex flex-col h-[520px] transition-all duration-300">
+            <div class="p-4 bg-rose-50/50 border-b border-stone-100">
+                <span class="text-xs font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-full font-child">第二句 · 残花飞莺</span>
+                <h3 class="text-xl font-bold font-han mt-1 text-stone-800">残花落尽见流莺</h3>
+            </div>
+
+            <!-- 桃树互动区 (支持点击摇晃) -->
+            <div class="relative w-full h-48 bg-gradient-to-b from-rose-50/50 to-amber-50/30 flex items-center justify-center overflow-hidden" id="tree-stage">
+                <!-- 飘落花瓣容器 -->
+                <div id="petal-container" class="absolute inset-0 pointer-events-none z-20"></div>
+
+                <!-- 交互桃树 SVG -->
+                <svg id="peach-tree" onclick="shakePeachTree()" class="w-48 h-48 cursor-pointer select-none transition-all duration-300 z-10" viewBox="0 0 200 200">
+                    <!-- 泥土/草地底座 -->
+                    <ellipse cx="100" cy="180" rx="40" ry="10" fill="#AED581" />
+                    
+                    <!-- 粗壮的棕色树干 -->
+                    <path d="M92,180 Q105,140 98,100" stroke="#8D6E63" stroke-width="12" stroke-linecap="round" fill="none" />
+                    <!-- 主要分支 -->
+                    <path d="M98,100 Q80,75 60,85" stroke="#8D6E63" stroke-width="7" stroke-linecap="round" fill="none" />
+                    <path d="M98,100 Q120,70 145,80" stroke="#8D6E63" stroke-width="7" stroke-linecap="round" fill="none" />
+                    <path d="M95,115 Q120,115 130,130" stroke="#8D6E63" stroke-width="5" stroke-linecap="round" fill="none" />
+                    
+                    <!-- 绿叶背景 -->
+                    <circle cx="70" cy="80" r="28" fill="#81C784" opacity="0.85" />
+                    <circle cx="130" cy="75" r="30" fill="#66BB6A" opacity="0.85" />
+                    <circle cx="100" cy="65" r="25" fill="#4CAF50" opacity="0.9" />
+
+                    <!-- 初始状态展示：粉嫩的桃花 (有粉色和亮黄花蕊) -->
+                    <g id="peach-blossoms" class="transition-all duration-1000 ease-in-out">
+                        <!-- 花朵1 -->
+                        <g transform="translate(60, 75)">
+                            <circle cx="0" cy="0" r="8" fill="#FF8A80" opacity="0.95" />
+                            <circle cx="-5" cy="-2" r="6" fill="#FFB7C5" />
+                            <circle cx="5" cy="2" r="6" fill="#FFB7C5" />
+                            <circle cx="-3" cy="5" r="6" fill="#FFB7C5" />
+                            <circle cx="3" cy="-5" r="6" fill="#FFB7C5" />
+                            <circle cx="0" cy="0" r="2" fill="#FFF59D" />
+                        </g>
+                        <!-- 花朵2 -->
+                        <g transform="translate(135, 70)">
+                            <circle cx="0" cy="0" r="8" fill="#FF8A80" opacity="0.95" />
+                            <circle cx="-4" cy="3" r="6" fill="#FFB7C5" />
+                            <circle cx="4" cy="-3" r="6" fill="#FFB7C5" />
+                            <circle cx="-2" cy="-4" r="6" fill="#FFB7C5" />
+                            <circle cx="2" cy="4" r="6" fill="#FFB7C5" />
+                            <circle cx="0" cy="0" r="2" fill="#FFF59D" />
+                        </g>
+                        <!-- 花朵3 -->
+                        <g transform="translate(100, 55)">
+                            <circle cx="0" cy="0" r="8" fill="#FF8A80" opacity="0.95" />
+                            <circle cx="3" cy="3" r="6" fill="#FFB7C5" />
+                            <circle cx="-3" cy="-3" r="6" fill="#FFB7C5" />
+                            <circle cx="4" cy="-3" r="6" fill="#FFB7C5" />
+                            <circle cx="-4" cy="3" r="6" fill="#FFB7C5" />
+                            <circle cx="0" cy="0" r="2" fill="#FFF59D" />
+                        </g>
+                        <!-- 小花朵4 -->
+                        <g transform="translate(75, 105)">
+                            <circle cx="0" cy="0" r="5" fill="#FF8A80" />
+                            <circle cx="-3" cy="-1" r="4" fill="#FFB7C5" />
+                            <circle cx="3" cy="1" r="4" fill="#FFB7C5" />
+                            <circle cx="0" cy="0" r="1.5" fill="#FFF59D" />
+                        </g>
+                        <!-- 小花朵5 -->
+                        <g transform="translate(125, 115)">
+                            <circle cx="0" cy="0" r="5" fill="#FF8A80" />
+                            <circle cx="1" cy="-3" r="4" fill="#FFB7C5" />
+                            <circle cx="-1" cy="3" r="4" fill="#FFB7C5" />
+                            <circle cx="0" cy="0" r="1.5" fill="#FFF59D" />
+                        </g>
+                    </g>
+                </svg>
+
+                <!-- 隐藏的黄色流莺 (初始状态不露面，摇树后华丽飞出并唱歌) -->
+                <div id="orioles-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30">
+                    <!-- 左飞黄莺 -->
+                    <div id="oriole-left" class="absolute hidden flex-col items-center">
+                        <div class="text-4xl filter drop-shadow select-none">🐤</div>
+                        <div class="bg-white/95 text-[10px] text-amber-800 font-bold px-1.5 py-0.5 rounded-md shadow-md border border-amber-200 mt-1 whitespace-nowrap">流莺：唧唧！</div>
+                    </div>
+                    <!-- 右飞黄莺 -->
+                    <div id="oriole-right" class="absolute hidden flex-col items-center">
+                        <div class="text-4xl filter drop-shadow select-none transform -scale-x-100">🐦</div>
+                        <div class="bg-white/95 text-[10px] text-amber-800 font-bold px-1.5 py-0.5 rounded-md shadow-md border border-amber-200 mt-1 whitespace-nowrap">唱歌啦！🎶</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文字与说明板块 -->
+            <div class="p-5 flex-1 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="bg-rose-50/60 border border-rose-100 p-3 rounded-xl flex items-start space-x-2">
+                        <span class="text-xl">💡</span>
+                        <div class="text-xs text-stone-600 leading-relaxed">
+                            <strong class="text-rose-800 font-child block mb-0.5">小朋友翻译机：</strong>
+                            晚春风一吹，树枝上最后的花瓣飘落啦。树林变得安静时，咦？茂密的柳叶中飞出了几只黄澄澄、活泼机灵的小黄莺，正“唧唧喳喳”欢快地唱歌呢！
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50">
+                            <span class="font-bold text-amber-800">残花：</span> 树上快要谢掉的花儿。代表春末夏初的时候。
+                        </div>
+                        <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50">
+                            <span class="font-bold text-amber-800">流莺：</span> 飞来飞去、唱歌很好听的黄莺鸟，就像流动的音符！
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互按键 -->
+                <div class="space-y-2">
+                    <button onclick="shakePeachTree()" id="shake-btn" class="w-full py-2.5 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-child text-sm font-bold shadow-md shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center space-x-1.5">
+                        <span>🌸 点击“摇一摇”桃树枝</span>
+                    </button>
+                    
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="changeSlide(2)" class="text-xs font-bold text-stone-400 hover:text-stone-600 px-3 py-1.5">❮ 返回雨后</button>
+                        <button onclick="changeSlide(4)" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">下一句：夜里的甜甜梦 ➔</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第四页：第三、四句“春风一夜吹乡梦，又逐春风到洛城” -->
+        <section id="slide-4" class="hidden bg-white rounded-2xl shadow-xl border border-stone-100 flex flex-col min-h-[520px] transition-all duration-300">
+            <div class="p-4 bg-indigo-50/50 border-b border-stone-100">
+                <span class="text-xs font-bold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-full font-child">第三、四句 · 思乡梦圆</span>
+                <h3 class="text-xl font-bold font-han mt-1 text-stone-800">春风一夜吹乡梦</h3>
+            </div>
+
+            <!-- 指尖滑屏梦境跑道 -->
+            <div class="p-4 flex flex-col space-y-2">
+                <p id="drag-tip" class="text-center text-xs font-child font-bold text-indigo-600 bg-indigo-50/80 py-1.5 px-3 rounded-full animate-pulse">
+                    👉 小朋友，按住“小家梦境云” 💭🏠，把它拖到右侧的“洛阳城”吧！
+                </p>
+                
+                <!-- 梦境漂移跑道 -->
+                <div id="dream-container" class="relative w-full h-36 bg-gradient-to-r from-blue-50/50 to-amber-50/50 rounded-xl border border-blue-100/50 flex items-center justify-between px-8 select-none overflow-hidden">
+                    <!-- 引导虚线 -->
+                    <div class="absolute left-16 right-16 top-1/2 border-t-2 border-dashed border-indigo-200 pointer-events-none z-0"></div>
+                    
+                    <!-- 睡觉的诗人 (起点) -->
+                    <div id="poet-start" class="flex flex-col items-center z-10 pointer-events-none">
+                        <div class="text-4xl relative">
+                            🛌
+                            <span class="absolute -top-3 -right-2 text-sm font-bold text-blue-500 animate-bounce" style="animation-duration: 2.5s;">💤</span>
+                        </div>
+                        <span class="block text-[10px] font-bold mt-1 text-stone-500 bg-blue-100/60 px-1.5 py-0.5 rounded-full">熟睡的诗人</span>
+                    </div>
+
+                    <!-- 可拖拽的梦境云朵 -->
+                    <div id="dream-cloud" class="absolute left-8 top-10 text-5xl cursor-grab active:cursor-grabbing select-none filter drop-shadow-md z-30 transition-shadow duration-200 touch-none flex items-center justify-center">
+                        💭<span class="absolute top-1.5 left-2.5 text-lg select-none">🏠</span>
+                    </div>
+
+                    <!-- 洛阳古城 (终点) -->
+                    <div id="luoyang-target" class="flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-300 border-2 border-transparent">
+                        <div class="text-4xl">🏯</div>
+                        <span class="block text-[10px] font-bold mt-1 text-stone-500 bg-amber-100/60 px-1.5 py-0.5 rounded-full">目标：洛阳城</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 说明板块 -->
+            <div class="px-5 pb-4 flex-1 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="bg-indigo-50/60 border border-indigo-100 p-3 rounded-xl flex items-start space-x-2">
+                        <span class="text-xl">💡</span>
+                        <div class="text-xs text-stone-600 leading-relaxed">
+                            <strong class="text-indigo-800 font-child block mb-0.5">小朋友翻译机：</strong>
+                            夜晚，思乡的微风悄悄吹进了诗人的梦中。梦里，诗人好像坐着春风的特快列车，“嗖”地一下飞了好多好多里路，快快乐乐地回到了日思夜想的洛阳城！
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50">
+                            <span class="font-bold text-amber-800">乡梦：</span> 诗人在梦中想念家乡。
+                        </div>
+                        <div class="bg-amber-50/50 p-2 rounded-lg border border-amber-100/50">
+                            <span class="font-bold text-amber-800">洛城：</span> 即洛阳，是诗人温馨眷恋的故乡。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互按键与页面导航（已完整补齐并修复） -->
+                <div class="space-y-2 pt-2">
+                    <button onclick="blowDreamWind()" id="wind-btn" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-child text-sm font-bold shadow-md active:scale-95 transition-all">
+                        🌬️ 呼——！吹起温柔的春风 (自动送达)
+                    </button>
+                    
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="changeSlide(3)" class="text-xs font-bold text-stone-400 hover:text-stone-600 px-3 py-1.5">❮ 返回飞莺</button>
+                        <button onclick="changeSlide(5)" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">最终章：国风探索 ➔</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第五页：全诗意境大盘点 -->
+        <section id="slide-5" class="hidden bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-100 flex flex-col h-[520px] transition-all duration-300">
+            <div class="p-4 bg-amber-50/80 border-b border-stone-100">
+                <span class="text-xs font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-child">全景大本营 · 诗画赏析</span>
+                <h3 class="text-xl font-bold font-han mt-1 text-stone-800">点击画卷听故事</h3>
+            </div>
+
+            <!-- 全幅水墨背景与综合知识气泡 -->
+            <div class="relative w-full h-56 bg-slate-100 flex items-center justify-center overflow-hidden">
+                <img src="01.png" alt="春兴意境图" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('final-fallback').classList.remove('hidden');">
+                <div id="final-fallback" class="hidden absolute inset-0 bg-gradient-to-tr from-stone-50 to-orange-50/50 flex items-center justify-center text-center p-4">
+                    <span class="text-xs text-stone-400">本地 01.png 水墨大图加载中...</span>
+                </div>
+
+                <!-- 交互感应气泡点1：雨过天晴 -->
+                <button onclick="showPopInfo('willow')" class="absolute top-1/4 left-1/4 w-8 h-8 rounded-full bg-teal-500/80 text-white font-bold flex items-center justify-center text-xs animate-bounce border-2 border-white shadow-lg shadow-teal-500/20 active:scale-95">柳</button>
+                
+                <!-- 交互感应气泡点2：残花落莺 -->
+                <button onclick="showPopInfo('bird')" class="absolute top-1/3 right-1/4 w-8 h-8 rounded-full bg-rose-500/80 text-white font-bold flex items-center justify-center text-xs animate-bounce border-2 border-white shadow-lg shadow-rose-500/20 active:scale-95" style="animation-delay: 0.5s;">莺</button>
+
+                <!-- 交互感应气泡点3：春风思乡 -->
+                <button onclick="showPopInfo('dream')" class="absolute bottom-1/4 right-1/3 w-8 h-8 rounded-full bg-indigo-500/80 text-white font-bold flex items-center justify-center text-xs animate-bounce border-2 border-white shadow-lg shadow-indigo-500/20 active:scale-95" style="animation-delay: 1s;">梦</button>
+            </div>
+
+            <div class="p-5 flex-1 flex flex-col justify-between">
+                <!-- 弹出的知识点卡片 -->
+                <div id="pop-card" class="bg-amber-50/70 border border-amber-100/80 p-3 rounded-xl min-h-[100px] flex items-start space-x-3 transition-all duration-300 float-bubble">
+                    <span id="pop-icon" class="text-3xl">💡</span>
+                    <div class="flex-1">
+                        <h4 id="pop-title" class="text-sm font-bold text-amber-900 font-han">点击上面的彩色气泡</h4>
+                        <p id="pop-desc" class="text-xs text-stone-600 mt-1 leading-relaxed">让古诗老师为你展开这幅美丽的春天画卷，看看里面藏着哪些诗歌小常识吧！</p>
+                    </div>
+                </div>
+
+                <!-- 底部复习区与开始页 -->
+                <div class="flex items-center space-x-2 pt-2">
+                    <button onclick="changeSlide(1)" class="flex-1 py-2 px-4 bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold rounded-xl active:scale-95 transition-all text-center">
+                        🔄 重新开始学习
+                    </button>
+                    <a href="https://www.google.com" target="_blank" class="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl active:scale-95 transition-all text-center">
+                        🎓 拓展国学知识
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 页脚进度条 -->
+    <footer class="w-full max-w-md px-6 text-center">
+        <!-- 进度条指示器 -->
+        <div class="flex items-center justify-between px-2 mb-2 text-[10px] font-bold text-stone-400">
+            <span>封面</span>
+            <span>雨晴</span>
+            <span>落尽</span>
+            <span>乡梦</span>
+            <span>全景</span>
+        </div>
+        <div class="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
+            <div id="progress-bar" class="bg-gradient-to-r from-teal-400 to-emerald-500 h-full w-[20%] transition-all duration-500 rounded-full"></div>
+        </div>
+        <p class="text-[10px] text-stone-400 mt-3 font-child">💡 支持手机轻触点击，滑动体验更佳！</p>
+    </footer>
+
+    <!-- 全局提示消息组件 -->
+    <div id="custom-toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-stone-900/90 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center space-x-1.5">
+        <span id="toast-icon">✨</span>
+        <span id="toast-msg">提示信息</span>
+    </div>
+
+    <!-- Web Audio API 与动效 JS 逻辑 -->
+    <script>
+        // 幻灯片页面管理
+        let currentSlide = 1;
+        const totalSlides = 5;
+
+        function changeSlide(slideNum) {
+            // 隐藏当前页，显示目标页
+            document.getElementById(`slide-${currentSlide}`).classList.add('hidden');
+            document.getElementById(`slide-${slideNum}`).classList.remove('hidden');
+            
+            // 更新进度条
+            const percent = (slideNum / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            
+            // 记录当前页
+            currentSlide = slideNum;
+            playChimeSound(); // 换页声音
+            
+            // 如果进入第四页，重置拖拽云朵位置
+            if (slideNum === 4) {
+                resetDreamCloud();
+            }
+        }
+
+        // Web Audio API 声音合成
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // 播放风铃换页音效
+        function playChimeSound() {
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(1800, now + 0.15);
+                
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } catch (e) {
+                console.log("Audio play failed, user interaction needed first");
+            }
+        }
+
+        // 播放合成的清脆黄莺鸟鸣声
+        function playBirdSound() {
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                
+                // 3次快速上下扫频，模拟鸟鸣
+                for (let i = 0; i < 3; i++) {
+                    const start = now + i * 0.14;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(2000, start);
+                    osc.frequency.exponentialRampToValueAtTime(3600, start + 0.08);
+                    
+                    gain.gain.setValueAtTime(0, start);
+                    gain.gain.linearRampToValueAtTime(0.12, start + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.11);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(start);
+                    osc.stop(start + 0.12);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        // 弹出自定义气泡信息
+        function showToast(msg, icon = "✨") {
+            const toast = document.getElementById('custom-toast');
+            document.getElementById('toast-icon').innerText = icon;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2500);
+        }
+
+        // 第一句：雨过天晴互动逻辑
+        let isRainy = true;
+        
+        function initRain() {
+            const container = document.getElementById('rain-container');
+            container.innerHTML = '';
+            if (!isRainy) return;
+            
+            // 创建雨滴
+            for (let i = 0; i < 35; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'rain-drop';
+                drop.style.left = `${Math.random() * 100}%`;
+                drop.style.top = `${Math.random() * -20}px`;
+                drop.style.animationDelay = `${Math.random() * 1.2}s`;
+                drop.style.animationDuration = `${0.8 + Math.random() * 0.6}s`;
+                container.appendChild(drop);
+            }
+        }
+        initRain(); // 初始下雨
+
+        function toggleRain() {
+            isRainy = !isRainy;
+            const sun = document.getElementById('sun-element');
+            const rainbow = document.getElementById('rainbow-element');
+            const willow = document.getElementById('willow-tree');
+            const btn = document.getElementById('rain-btn');
+            
+            if (!isRainy) {
+                // 晴天
+                initRain(); // 清空雨滴
+                sun.classList.remove('scale-0');
+                sun.classList.add('scale-100');
+                rainbow.classList.remove('opacity-0');
+                rainbow.classList.add('opacity-100');
+                btn.innerHTML = '<span>🌧️ 重新下一场淅沥春雨</span>';
+                btn.className = "w-full py-2.5 px-4 bg-emerald-600 text-white rounded-xl font-child text-sm font-bold shadow-md active:scale-95 transition-all flex items-center justify-center space-x-1.5";
+                showToast("雨停啦！太阳和彩虹出来喽！", "☀️");
+                
+                // 柳叶换上灿烂嫩绿装
+                document.querySelectorAll('#willow-branches path').forEach(path => {
+                    path.setAttribute('stroke', '#81C784');
+                });
+            } else {
+                // 雨天
+                sun.classList.remove('scale-100');
+                sun.classList.add('scale-0');
+                rainbow.classList.remove('opacity-100');
+                rainbow.classList.add('opacity-0');
+                initRain();
+                btn.innerHTML = '<span>☀️ 拨开云雾：让雨停下</span>';
+                btn.className = "w-full py-2.5 px-4 bg-sky-600 text-white rounded-xl font-child text-sm font-bold shadow-md active:scale-95 transition-all flex items-center justify-center space-x-1.5";
+                
+                // 恢复深绿
+                document.querySelectorAll('#willow-branches path').forEach(path => {
+                    path.setAttribute('stroke', '#2E7D32');
+                });
+            }
+            playChimeSound();
+        }
+
+        // 点击杨柳抖落露珠/露水
+        function splashDew() {
+            const container = document.getElementById('dew-container');
+            container.innerHTML = '';
+            
+            // 柳树微晃
+            const willow = document.getElementById('willow-tree');
+            willow.classList.add('animate-shake');
+            setTimeout(() => willow.classList.remove('animate-shake'), 800);
+            
+            playChimeSound();
+
+            const colors = isRainy ? ['#B3E5FC', '#E1F5FE', '#81D4FA'] : ['#FFF59D', '#FFE082', '#FFF9C4'];
+            const count = 12;
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute w-2 h-2 rounded-full transition-all duration-1000 ease-out pointer-events-none z-30';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = '50%';
+                particle.style.top = '40%';
+                
+                container.appendChild(particle);
+
+                // 物理抛散轨迹
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 30 + Math.random() * 60;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance + 40; // 往下掉落感
+
+                setTimeout(() => {
+                    particle.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    particle.style.opacity = '0';
+                }, 50);
+            }
+
+            showToast(isRainy ? "摇一摇柳树，抖落一身晶莹雨滴！💧" : "柳树披上了暖和的金色光芒！✨", isRainy ? "💧" : "✨");
+        }
+
+        // 第二句：残花落尽见流莺 互动逻辑
+        let hasShaken = false;
+
+        function shakePeachTree() {
+            const tree = document.getElementById('peach-tree');
+            const petalsContainer = document.getElementById('petal-container');
+            const blossoms = document.getElementById('peach-blossoms');
+            const leftBird = document.getElementById('oriole-left');
+            const rightBird = document.getElementById('oriole-right');
+            
+            // 防止高频重复点击
+            if (tree.classList.contains('animate-shake')) return;
+            
+            // 摇晃树
+            tree.classList.add('animate-shake');
+            setTimeout(() => {
+                tree.classList.remove('animate-shake');
+            }, 800);
+
+            playChimeSound();
+
+            // 1. 生成落下的粉色花瓣
+            const leafSymbols = ['🌸', ' petal', '💮'];
+            for (let i = 0; i < 20; i++) {
+                const petal = document.createElement('div');
+                
+                if (Math.random() > 0.4) {
+                    petal.innerText = '🌸';
+                    petal.style.fontSize = `${12 + Math.random() * 14}px`;
+                } else {
+                    // SVG 纯色小圆点充当落英
+                    petal.style.width = `${6 + Math.random() * 8}px`;
+                    petal.style.height = `${4 + Math.random() * 6}px`;
+                    petal.style.backgroundColor = '#FFB7C5';
+                    petal.style.borderRadius = '50% 0 50% 50%';
+                }
+                
+                petal.className = 'petal z-20';
+                petal.style.left = `${20 + Math.random() * 60}%`;
+                petal.style.top = `${20 + Math.random() * 20}%`;
+                
+                // 飘移和振幅
+                const drift = -80 + Math.random() * 160;
+                petal.style.setProperty('--drift', `${drift}px`);
+                
+                petal.style.animationDelay = `${Math.random() * 0.5}s`;
+                petal.style.animationDuration = `${1.5 + Math.random() * 1.5}s`;
+                petalsContainer.appendChild(petal);
+                
+                // 动画结束移除节点
+                petal.addEventListener('animationend', () => petal.remove());
+            }
+
+            // 如果是第一次摇动，触发“落尽”和“飞出黄莺”
+            if (!hasShaken) {
+                hasShaken = true;
+                
+                // 2. 树上的桃花渐渐变少褪色 (模拟残花落尽)
+                blossoms.style.opacity = '0.05';
+                blossoms.style.transform = 'scale(0.4)';
+                
+                // 3. 0.8秒后，等桃花落到半空中时，黄莺惊艳飞出并快乐唱歌
+                setTimeout(() => {
+                    // 左边黄莺飞出
+                    leftBird.classList.remove('hidden');
+                    leftBird.style.left = '45%';
+                    leftBird.style.top = '45%';
+                    leftBird.classList.add('fly-left');
+                    
+                    // 右边黄莺飞出
+                    rightBird.classList.remove('hidden');
+                    rightBird.style.left = '55%';
+                    rightBird.style.top = '40%';
+                    rightBird.classList.add('fly-right');
+
+                    // 播放清脆悦耳的鸟鸣
+                    playBirdSound();
+                    showToast("残花落尽，流莺飞出来唱歌啦！🐤🎶", "🐤");
+                    
+                    // 更新按钮文案
+                    document.getElementById('shake-btn').innerHTML = '<span>🐤 听黄莺在春风里唱歌</span>';
+                }, 800);
+            } else {
+                // 之后点击只播放声音 and 飘落少量花瓣
+                if (leftBird.classList.contains('fly-left')) {
+                    playBirdSound();
+                }
+            }
+        }
+
+        // 第三、四句：春风乡梦拖拽逻辑
+        const cloud = document.getElementById('dream-cloud');
+        const container = document.getElementById('dream-container');
+        const target = document.getElementById('luoyang-target');
+        
+        let isDragging = false;
+        let startX, startY;
+        let activeX = 0, activeY = 0; // 当前平移像素值
+        let initialTransformX = 0, initialTransformY = 0;
+        let dreamSuccess = false;
+
+        function resetDreamCloud() {
+            dreamSuccess = false;
+            activeX = 0;
+            activeY = 0;
+            cloud.style.transition = 'none';
+            cloud.style.transform = 'translate(0px, 0px) scale(1)';
+            cloud.style.opacity = '1';
+            
+            // 恢复目标城门样式
+            target.className = "flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-300 border-2 border-transparent";
+            document.getElementById('drag-tip').innerText = "👉 小朋友，用手指按住“梦境小云朵” 💭🏠，把它拖到右边的“洛阳城”吧！";
+            document.getElementById('drag-tip').className = "text-center text-xs font-child font-bold text-indigo-600 bg-indigo-50/80 py-1.5 px-3 rounded-full animate-pulse";
+            document.getElementById('wind-btn').disabled = false;
+            document.getElementById('wind-btn').innerText = "🌬️ 呼——！吹起温柔的春风 (自动送达)";
+        }
+
+        // 绑定移动端与桌面端的统一 Pointer 事件
+        cloud.addEventListener('pointerdown', function(e) {
+            if (dreamSuccess) return;
+            initAudio();
+            isDragging = true;
+            
+            // 获取拖拽起点位置
+            startX = e.clientX;
+            startY = e.clientY;
+            initialTransformX = activeX;
+            initialTransformY = activeY;
+            
+            // 设置捕获
+            cloud.setPointerCapture(e.pointerId);
+            
+            // 添加拖起动效
+            cloud.style.transition = 'none';
+            cloud.classList.add('scale-110');
+            cloud.style.filter = 'drop-shadow(0 12px 12px rgba(99, 102, 241, 0.3))';
+        });
+
+        cloud.addEventListener('pointermove', function(e) {
+            if (!isDragging || dreamSuccess) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            activeX = initialTransformX + dx;
+            activeY = initialTransformY + dy;
+            
+            // 渲染位置
+            cloud.style.transform = `translate(${activeX}px, ${activeY}px) scale(1.15)`;
+            
+            // 实时距离判定：如果非常接近终点，让城门发出闪光提示
+            const cRect = cloud.getBoundingClientRect();
+            const tRect = target.getBoundingClientRect();
+            const cCenterX = cRect.left + cRect.width / 2;
+            const cCenterY = cRect.top + cRect.height / 2;
+            const tCenterX = tRect.left + tRect.width / 2;
+            const tCenterY = tRect.top + tRect.height / 2;
+            
+            const distance = Math.hypot(cCenterX - tCenterX, cCenterY - tCenterY);
+            if (distance < 75) {
+                target.className = "flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-200 border-2 border-dashed border-amber-400 bg-amber-100/60 scale-105 shadow-inner animate-pulse";
+            } else {
+                target.className = "flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-200 border-2 border-transparent";
+            }
+        });
+
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            cloud.releasePointerCapture(e.pointerId);
+            
+            // 移除拖拽效果
+            cloud.classList.remove('scale-110');
+            cloud.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))';
+            
+            // 计算是否成功抵达
+            const cRect = cloud.getBoundingClientRect();
+            const tRect = target.getBoundingClientRect();
+            const cCenterX = cRect.left + cRect.width / 2;
+            const cCenterY = cRect.top + cRect.height / 2;
+            const tCenterX = tRect.left + tRect.width / 2;
+            const tCenterY = tRect.top + tRect.height / 2;
+            
+            const distance = Math.hypot(cCenterX - tCenterX, cCenterY - tCenterY);
+            
+            cloud.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            
+            if (distance < 75) {
+                // 梦境到达洛阳城 (成功)
+                triggerDreamSuccess(cCenterX, cCenterY, tCenterX, tCenterY);
+            } else {
+                // 回弹到枕边
+                activeX = 0;
+                activeY = 0;
+                cloud.style.transform = 'translate(0px, 0px) scale(1)';
+                target.className = "flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-300 border-2 border-transparent";
+                playChimeSound();
+                showToast("快拉近一些！梦境要吹到洛阳城哦！🌬️", "💭");
+            }
+        }
+
+        cloud.addEventListener('pointerup', handleDragEnd);
+        cloud.addEventListener('pointercancel', handleDragEnd);
+
+        // 触发梦境成功抵达画面
+        function triggerDreamSuccess(cCenterX, cCenterY, tCenterX, tCenterY) {
+            dreamSuccess = true;
+            
+            // 计算终点对齐坐标偏移量
+            const extraX = tCenterX - cCenterX;
+            const extraY = tCenterY - cCenterY;
+            activeX = activeX + extraX;
+            activeY = activeY + extraY;
+            
+            // 吸附到城门
+            cloud.style.transform = `translate(${activeX}px, ${activeY}px) scale(1)`;
+            target.className = "flex flex-col items-center z-10 p-2 rounded-xl transition-all duration-300 border-2 border-emerald-500 bg-emerald-50 scale-105 shadow-md";
+            
+            // 播放清脆胜利声音
+            playBirdSound();
+            
+            // 提示文案
+            document.getElementById('drag-tip').innerText = "🎉 哇！你真棒！成功把诗人的梦送到洛阳城啦！";
+            document.getElementById('drag-tip').className = "text-center text-xs font-child font-bold text-emerald-700 bg-emerald-100 py-1.5 px-3 rounded-full shadow-sm";
+            document.getElementById('wind-btn').disabled = true;
+            document.getElementById('wind-btn').innerText = "💖 又逐春风到洛城 (已送达)";
+            
+            showToast("成功回乡！春风一夜吹乡梦！", "🏯");
+        }
+
+        // 备用自动春风吹送函数
+        function blowDreamWind() {
+            if (dreamSuccess) return;
+            initAudio();
+            
+            // 测量
+            const cRect = cloud.getBoundingClientRect();
+            const tRect = target.getBoundingClientRect();
+            const cCenterX = cRect.left + cRect.width / 2;
+            const cCenterY = cRect.top + cRect.height / 2;
+            const tCenterX = tRect.left + tRect.width / 2;
+            const tCenterY = tRect.top + tRect.height / 2;
+            
+            // 启动平滑过渡
+            cloud.style.transition = 'transform 2s cubic-bezier(0.25, 0.8, 0.25, 1)';
+            
+            const extraX = tCenterX - cCenterX;
+            const extraY = tCenterY - cCenterY;
+            activeX = activeX + extraX;
+            activeY = activeY + extraY;
+            
+            cloud.style.transform = `translate(${activeX}px, ${activeY}px) scale(1)`;
+            
+            setTimeout(() => {
+                triggerDreamSuccess(tCenterX, tCenterY, tCenterX, tCenterY);
+            }, 2000);
+        }
+
+        // 第五页：全景水墨画卷展示逻辑
+        const infoDatabase = {
+            willow: {
+                title: "杨柳阴阴 (杨柳与惜别)",
+                desc: "在我国古代，‘柳’和‘留’发音很像。人们在送别好朋友时，经常会折一根柳条送给他，表示‘想留住你，舍不得你走’。这首诗里茂密的杨柳也寄托了诗人的淡淡愁绪呢！",
+                icon: "🌿"
+            },
+            bird: {
+                title: "流莺啼鸣 (黄莺的消息)",
+                desc: "黄莺在树林间欢快飞翔，用悦耳的歌声宣告着初夏的来临。在漫天残花凋谢、春色即将逝去的伤感里，飞出的黄莺代表着大自然里蓬勃的新生机！",
+                icon: "🐤"
+            },
+            dream: {
+                title: "吹乡梦 (春风作伴好还乡)",
+                desc: "古人回家一趟非常不容易，山高水远。所以，诗人武元衡在晚上睡觉时，梦见自己插上了翅膀，跟着温暖明朗的春风，一晚上就飞回了心爱的故乡洛阳，多么浪漫！",
+                icon: "💭"
+            }
+        };
+
+        function showPopInfo(key) {
+            playChimeSound();
+            const data = infoDatabase[key];
+            if (!data) return;
+            
+            const card = document.getElementById('pop-card');
+            const icon = document.getElementById('pop-icon');
+            const title = document.getElementById('pop-title');
+            const desc = document.getElementById('pop-desc');
+            
+            // 弹性显隐动画
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                icon.innerText = data.icon;
+                title.innerText = data.title;
+                desc.innerText = data.desc;
+                card.style.opacity = '1';
+                card.style.transform = 'scale(1)';
+            }, 150);
+        }
+    </script>
+</body>
+</html>

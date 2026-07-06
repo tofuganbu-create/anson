@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《春夜》互动魔法画卷</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&display=swap');
+        
+        body {
+            /* 浅青色背景，呼应春夜氛围 */
+            background-color: #e0f2f1;
+            font-family: 'ZCOOL KuaiLe', 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 古典书法字体用于诗句展示 */
+        .gushi-font {
+            font-family: 'Ma Shan Zheng', cursive, serif;
+        }
+
+        /* 焦点光圈动画 */
+        .spotlight {
+            position: absolute;
+            border: 4px dashed #fbbf24; /* 金黄色虚线边框 */
+            border-radius: 50%;
+            box-shadow: 0 0 20px 10px rgba(251, 191, 36, 0.4), inset 0 0 20px rgba(251, 191, 36, 0.5);
+            background-color: rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease-in-out;
+            transform: translate(-50%, -50%) scale(0.8);
+            z-index: 10;
+        }
+
+        .spotlight.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            animation: pulse-ring 2s infinite alternate;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 15px #fbbf24; }
+            100% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 30px #f59e0b; }
+        }
+
+        /* 漂浮花瓣特效 (仅在最后一句触发) */
+        .petal {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #fbcfe8;
+            border-radius: 15px 0 15px 0;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        @keyframes float-petal {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translate(-300px, 100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* 卷轴风格容器 */
+        .scroll-container {
+            background-color: #fffaf0;
+            border: 8px solid #d4a373;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* 打字机光标闪烁 */
+        .cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+
+    <!-- 返回主页按钮 -->
+    <div class="fixed top-4 left-4 z-50">
+        <a href="../index.html" class="flex items-center space-x-1.5 text-stone-700 hover:text-teal-800 bg-white/90 hover:bg-white active:scale-95 transition-all px-4 py-2 rounded-full text-sm font-bold shadow-md border border-stone-200/40">
+            <span>🏠</span>
+            <span>返回主页</span>
+        </a>
+    </div>
+
+    <!-- 顶部标题区 -->
+    <div class="text-center mb-6">
+        <h1 class="text-4xl md:text-5xl font-bold text-teal-800 mb-2 drop-shadow-md flex items-center justify-center gap-3">
+            <span>✨</span> 探索《春夜》魔法画卷 <span>✨</span>
+        </h1>
+        <p class="text-teal-600 text-lg md:text-xl">点击下面的按钮，寻找画里的秘密吧！</p>
+    </div>
+
+    <!-- 主要互动区 -->
+    <div class="w-full max-w-5xl scroll-container overflow-hidden flex flex-col">
+        
+        <!-- 图片展示与互动热区 -->
+        <div class="relative w-full aspect-[16/9] bg-gray-100 overflow-hidden" id="image-container">
+            <!-- 插入提供的图片文件 -->
+            <img src="01.png" alt="春夜诗意图" class="w-full h-full object-cover">
+            
+            <!-- 热区指示器 (位置通过JS动态计算) -->
+            <div id="spotlight" class="spotlight"></div>
+            
+            <!-- 用于存放花瓣特效的容器 -->
+            <div id="petals-container" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+
+        <!-- 下方控制与对话区 -->
+        <div class="p-4 md:p-6 bg-gradient-to-b from-orange-50 to-orange-100 flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- 讲解员对话框 (模仿原图左下角的小女孩) -->
+            <div class="w-full md:w-1/2 bg-white p-4 rounded-xl shadow-inner border-2 border-orange-200 relative">
+                <div class="absolute -top-5 -left-2 text-4xl">👧🏻</div>
+                <h3 class="text-xl text-orange-800 font-bold ml-8 mb-2" id="dialog-title">🌸 创作背景</h3>
+                <div class="text-gray-700 text-lg leading-relaxed ml-2 min-h-[100px]" id="dialog-text-container">
+                    <span id="dialog-text">这首诗是唐朝大书法家虞世南爷爷写的哦！在一个美丽的春夜，他在皇家大花园里散步，看到迷人的夜色，忍不住写下了这首《春夜》。点击右边的诗句，我们一起去画里寻宝吧！</span><span class="cursor" id="cursor"></span>
+                </div>
+            </div>
+
+            <!-- 互动按钮区 -->
+            <div class="w-full md:w-1/2 flex flex-col gap-3">
+                <button onclick="showSection('bg')" class="w-full py-2 px-4 bg-orange-400 hover:bg-orange-500 text-white rounded-lg shadow-md transition-all active:scale-95 text-lg font-bold">
+                    📜 了解创作背景
+                </button>
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <button onclick="showSection('line1')" class="py-3 px-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-md transition-all active:scale-95 text-lg gushi-font">
+                        🌙 春苑月裴回
+                    </button>
+                    <button onclick="showSection('line2')" class="py-3 px-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-md transition-all active:scale-95 text-lg gushi-font">
+                        🏮 竹堂侵夜开
+                    </button>
+                    <button onclick="showSection('line3')" class="py-3 px-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-md transition-all active:scale-95 text-lg gushi-font">
+                        🦅 惊鸟排林度
+                    </button>
+                    <button onclick="showSection('line4')" class="py-3 px-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-md transition-all active:scale-95 text-lg gushi-font">
+                        🌸 风花隔水来
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 定义互动数据
+        const storyData = {
+            'bg': {
+                title: "🌸 创作背景",
+                text: "这首诗是唐朝大书法家虞世南爷爷写的哦！在一个美丽的春夜，他在皇家大花园里散步，看到迷人的夜色，忍不住写下了这首《春夜》。点击右边的诗句，我们一起去画里寻宝吧！",
+                spot: null // 没有焦点
+            },
+            'line1': {
+                title: "🌙 春苑月裴回",
+                text: "【大意】：皇家花园里，月亮像个调皮的孩子在散步。\n快看天上！“裴回”（也就是徘徊）就是走来走去、舍不得离开的样子。月亮姐姐是不是在偷偷看着我们呢？",
+                spot: { x: '33%', y: '18%', width: '18vw', height: '18vw', max: '150px' } 
+            },
+            'line2': {
+                title: "🏮 竹堂侵夜开",
+                text: "【大意】：竹林里的小屋，到了深夜还敞开着门。\n看右边！“侵夜”就是到了深夜。这么晚了，被竹子包围的小屋还亮着暖暖的灯光，也许虞爷爷正在里面写诗呢！",
+                spot: { x: '78%', y: '62%', width: '25vw', height: '25vw', max: '220px' }
+            },
+            'line3': {
+                title: "🦅 惊鸟排林度",
+                text: "【大意】：被惊动的小鸟排着队飞过树林。\n扑棱棱！左边树林上空飞过一群小鸟。“度”就是飞过。肯定是夜晚的风声或者谁的脚步声把它们吓着啦！",
+                spot: { x: '18%', y: '42%', width: '20vw', height: '15vw', max: '180px' }
+            },
+            'line4': {
+                title: "🌸 风花隔水来",
+                text: "【大意】：春风把对岸的花瓣隔着水面吹了过来。\n呼——深呼吸！一阵温柔的风吹过小河，把粉色的花瓣都吹过来了。“隔水来”是不是让你感觉花瓣像小精灵一样飞到了面前？",
+                spot: { x: '50%', y: '75%', width: '40vw', height: '20vw', max: '350px' },
+                action: createPetals // 触发特效
+            }
+        };
+
+        let typeWriterTimeout;
+        const dialogTitle = document.getElementById('dialog-title');
+        const dialogText = document.getElementById('dialog-text');
+        const spotlight = document.getElementById('spotlight');
+        const petalsContainer = document.getElementById('petals-container');
+
+        // 打字机特效函数
+        function typeWriter(text, i) {
+            if (i === 0) {
+                dialogText.innerHTML = "";
+            }
+            if (i < text.length) {
+                // 处理换行符
+                if(text.charAt(i) === '\n') {
+                    dialogText.innerHTML += "<br/>";
+                } else {
+                    dialogText.innerHTML += text.charAt(i);
+                }
+                typeWriterTimeout = setTimeout(() => typeWriter(text, i + 1), 50); // 打字速度
+            }
+        }
+
+        // 飘花特效函数
+        function createPetals() {
+            petalsContainer.innerHTML = ''; // 清空之前的
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.classList.add('petal');
+                    // 随机起始位置 (画面右侧偏下)
+                    petal.style.left = (70 + Math.random() * 20) + '%';
+                    petal.style.top = (50 + Math.random() * 30) + '%';
+                    // 随机动画时长
+                    petal.style.animation = `float-petal ${3 + Math.random() * 2}s ease-in forwards`;
+                    petalsContainer.appendChild(petal);
+                    
+                    // 动画结束后移除元素
+                    setTimeout(() => {
+                        petal.remove();
+                    }, 5000);
+                }, i * 200); // 错开生成时间
+            }
+        }
+
+        // 主要点击处理函数
+        function showSection(sectionId) {
+            const data = storyData[sectionId];
+            
+            // 1. 停止之前的打字机
+            clearTimeout(typeWriterTimeout);
+            
+            // 2. 更新标题和文字
+            dialogTitle.innerText = data.title;
+            typeWriter(data.text, 0);
+
+            // 3. 处理光圈热区
+            if (data.spot) {
+                spotlight.style.left = data.spot.x;
+                spotlight.style.top = data.spot.y;
+                spotlight.style.width = data.spot.width;
+                spotlight.style.maxWidth = data.spot.max;
+                spotlight.style.height = data.spot.height;
+                spotlight.style.maxHeight = data.spot.max;
+                spotlight.classList.add('active');
+            } else {
+                spotlight.classList.remove('active');
+            }
+
+            // 4. 清除旧特效
+            petalsContainer.innerHTML = '';
+            
+            // 5. 触发特定动作
+            if (data.action) {
+                data.action();
+            }
+        }
+
+        // 页面加载完成后的小提示
+        window.onload = function() {
+            console.log("画卷准备完毕！");
+        };
+    </script>
+</body>
+</html>
