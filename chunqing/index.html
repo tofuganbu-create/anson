@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雨晴 - 互动诗意画卷</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Calligraphy style -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght=400;700&family=ZCOOL_XiaoWei&family=ZCOOL+KuaiLe&display=swap');
+    
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background-color: #f4f1ea;
+    }
+    
+    .font-poetic {
+      font-family: 'ZCOOL XiaoWei', serif;
+    }
+    
+    .font-child {
+      font-family: 'ZCOOL KuaiLe', sans-serif;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c2b59b;
+      border-radius: 3px;
+    }
+
+    /* Keyframe animations for rich nature elements */
+    @keyframes wind-sway {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(2deg); }
+    }
+    .sway {
+      animation: wind-sway 4s ease-in-out infinite;
+    }
+
+    @keyframes wing-flap {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(0.3); }
+    }
+    .butterfly-wing-left, .butterfly-wing-right {
+      transform-origin: 0px 0px;
+      animation: wing-flap 0.6s ease-in-out infinite;
+    }
+
+    /* 当添加了飞行状态后，翅膀瞬间加快扇动频率 */
+    .fly-in-active .butterfly-wing-left, .fly-in-active .butterfly-wing-right,
+    .fly-out-active .butterfly-wing-left, .fly-out-active .butterfly-wing-right {
+      animation-duration: 0.12s !important;
+    }
+
+    @keyframes bee-buzz {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(3deg); }
+    }
+    .bee-hover {
+      animation: bee-buzz 1.5s ease-in-out infinite;
+    }
+
+    @keyframes float-cloud {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(15px); }
+    }
+    .cloud-anim {
+      animation: float-cloud 8s ease-in-out infinite;
+    }
+
+    /* ==================== 雨水与落花动画 ==================== */
+    @keyframes fall-rain {
+      0% { transform: translateY(-20px); opacity: 0; }
+      20% { opacity: 0.8; }
+      100% { transform: translateY(600px); opacity: 0; }
+    }
+    .rain-drop {
+      animation: fall-rain 1.2s linear infinite;
+    }
+
+    @keyframes bud-fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateY(120px) rotate(45deg); opacity: 0; }
+    }
+    .bud-falling {
+      animation: bud-fall 1.5s ease-in forwards !important;
+      pointer-events: none;
+    }
+    .bud-hidden {
+      opacity: 0 !important;
+      pointer-events: none;
+    }
+
+    @keyframes leaf-shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-6deg); }
+      75% { transform: rotate(6deg); }
+    }
+    .leaf-shaking {
+      animation: leaf-shake 0.3s ease-in-out;
+    }
+
+    @keyframes drop-fall {
+      0% { transform: translateY(0) scale(1); opacity: 0.8; }
+      100% { transform: translateY(80px) scale(0.3); opacity: 0; }
+    }
+    .water-drop {
+      animation: drop-fall 0.6s cubic-bezier(0.5, 0, 1, 1) forwards;
+    }
+
+    /* ==================== 蛱蝶出场与离场动画 (Scene 3) ==================== */
+    @keyframes flyIn {
+      0% { transform: translate(-100px, 150px) scale(1.5) rotate(20deg); opacity: 0; }
+      100% { transform: translate(388px, 420px) scale(0.9) rotate(0deg); opacity: 1; }
+    }
+    .fly-in-active {
+      animation: flyIn 2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+    }
+    @keyframes beeFlyIn {
+      0% { transform: translate(-150px, 180px) scale(1.2); opacity: 0; }
+      100% { transform: translate(300px, 470px) scale(0.8); opacity: 1; }
+    }
+    .bee-fly-in-active {
+      animation: beeFlyIn 2.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+    }
+
+    @keyframes flyOut {
+      0% { transform: translate(388px, 420px) scale(0.9) rotate(0deg); opacity: 1; }
+      30% { transform: translate(400px, 350px) scale(0.8) rotate(15deg); opacity: 1; }
+      70% { transform: translate(420px, 380px) scale(0.5) rotate(5deg); opacity: 0.8; }
+      100% { transform: translate(405px, 420px) scale(0.1) rotate(0deg); opacity: 0; }
+    }
+    .fly-out-active {
+      animation: flyOut 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+    }
+    @keyframes beeFlyOut {
+      0% { transform: translate(300px, 470px) scale(0.8); opacity: 1; }
+      40% { transform: translate(350px, 380px) scale(0.6); opacity: 1; }
+      100% { transform: translate(400px, 420px) scale(0.1); opacity: 0; }
+    }
+    .bee-fly-out-active {
+      animation: beeFlyOut 4.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+    }
+
+    /* ==================== 镜头拉近放大动画 (Scene 4) ==================== */
+    .door-zoomed {
+      transform: scale(25) !important;
+    }
+    
+    @keyframes breathe-color {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+    .imagined-colors {
+      transform-origin: 400px 360px;
+      animation: breathe-color 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden text-stone-800">
+
+  <!-- Header Section -->
+  <header class="p-6 border-b border-stone-200/60 bg-[#faf8f5]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-4 text-left">
+        <a href="../index.html" class="flex items-center gap-1.5 text-stone-600 hover:text-emerald-700 bg-stone-100/80 hover:bg-stone-200/50 active:scale-95 transition-all px-3.5 py-1.5 rounded-full text-xs font-bold font-child border border-stone-200/40">
+          <span>🏠</span>
+          <span>返回主页</span>
+        </a>
+        <div class="border-l border-stone-200 pl-4">
+          <h1 class="text-3xl font-bold font-poetic text-stone-900 tracking-wide flex items-center gap-2">
+            <span>《雨晴》</span>
+            <span class="text-sm font-sans bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-normal">多感官互动画卷</span>
+          </h1>
+          <p class="text-xs text-stone-500 mt-1 font-sans">唐·王驾 | 为好奇的小朋友打造的古典诗境漫游</p>
+        </div>
+      </div>
+
+      <button id="btn-read-poem" onclick="speakPoem()" class="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full transition-all duration-300 shadow-md shadow-emerald-700/10 active:scale-95 font-sans text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-volume-up-fill" viewBox="0 0 16 16">
+          <path d="M11.536 14.01A8.47 8.47 0 0 0 14.02 8a8.47 8.47 0 0 0-2.484-6.01.5.5 0 0 0-.707.708A7.48 7.48 0 0 1 13 8a7.48 7.48 0 0 1-2.172 5.303.5.5 0 0 0 .707.707z"/>
+          <path d="M10.121 12.596A6.48 6.48 0 0 0 12 8a6.48 6.48 0 0 0-1.879-4.596.5.5 0 0 0-.707.707A5.48 5.48 0 0 1 11 8a5.48 5.48 0 0 1-1.586 3.889.5.5 0 0 0 .707.707zM8.707 11.182A4.5 4.5 0 0 0 10 8a4.5 4.5 0 0 0-1.293-3.182.5.5 0 0 0-.707.707A3.5 3.5 0 0 1 9 8a3.5 3.5 0 0 1-1.003 2.475.5.5 0 0 0 .71.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+        </svg>
+        <span>听诗人吟诵</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl w-full mx-auto p-4 md:p-6 flex-grow flex flex-col lg:flex-row gap-6 items-stretch">
+    
+    <!-- Sidebar 控制面板 -->
+    <section class="lg:w-1/3 flex flex-col justify-between gap-4 z-40 relative">
+      <div class="bg-white/90 border border-stone-200/80 rounded-2xl p-6 shadow-xl shadow-stone-100 backdrop-blur-sm flex flex-col justify-between h-full">
+        <div>
+          <span class="text-xs font-bold text-emerald-700 tracking-widest uppercase block mb-3 font-sans">时间线控制面板</span>
+          <div class="space-y-4">
+            <button onclick="switchScene(1)" id="btn-scene-1" class="w-full text-left p-4 rounded-xl border-2 border-emerald-600 bg-emerald-50/50 transition-all duration-300 group">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">一</span>
+                <span class="text-xl font-bold font-poetic tracking-wide group-hover:text-emerald-700 transition-colors">雨前初见花间蕊</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-2 pl-10 font-sans leading-relaxed">乌云密布，点击天空会下雨哦！你也可以点击底部小巧的花苞，观察它们的变化。</p>
+            </button>
+
+            <button onclick="switchScene(2)" id="btn-scene-2" class="w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-stone-300 bg-stone-50/50 transition-all duration-300 group">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center font-bold text-sm">二</span>
+                <span class="text-xl font-bold font-poetic tracking-wide group-hover:text-emerald-700 transition-colors">雨后兼无叶里花</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-2 pl-10 font-sans leading-relaxed">雨过天晴，娇弱的花苞被雨水打落了。点击挂满雨水的叶片，甩出水滴！</p>
+            </button>
+
+            <button onclick="switchScene(3)" id="btn-scene-3" class="w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-stone-300 bg-stone-50/50 transition-all duration-300 group">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center font-bold text-sm">三</span>
+                <span class="text-xl font-bold font-poetic tracking-wide group-hover:text-emerald-700 transition-colors">蛱蝶飞来过墙去</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-2 pl-10 font-sans leading-relaxed">看！美丽的蛱蝶飞来停在枝头。发现这里没有花，点击画面，让它起飞去探寻春色。</p>
+            </button>
+
+            <button onclick="switchScene(4)" id="btn-scene-4" class="w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-stone-300 bg-stone-50/50 transition-all duration-300 group">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center font-bold text-sm">四</span>
+                <span class="text-xl font-bold font-poetic tracking-wide group-hover:text-emerald-700 transition-colors">却疑春色在邻家</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-2 pl-10 font-sans leading-relaxed">一道紧闭的门。点击大门，凑近门缝去观察诗人浪漫的“逻辑推导”。</p>
+            </button>
+
+            <button onclick="switchScene(5)" id="btn-scene-5" class="w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-stone-300 bg-stone-50/50 transition-all duration-300 group">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center font-bold text-sm">五</span>
+                <span class="text-xl font-bold font-poetic tracking-wide group-hover:text-emerald-700 transition-colors">雨晴全图赏析</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-2 pl-10 font-sans leading-relaxed">画卷完全展开！欣赏《春晴》的精美意境国风图，感受诗中描绘的生机与趣味。</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-stone-100 bg-[#fbfaf7] rounded-xl p-3 flex gap-3 items-start">
+          <div class="text-emerald-700 text-xl mt-0.5">💡</div>
+          <div>
+            <h4 class="text-xs font-bold font-sans text-stone-700">小小的逻辑学家</h4>
+            <p class="text-[11px] text-stone-500 mt-1 leading-normal font-sans">
+              如果你是机器人工程师，你会怎么写这段程序？<br>
+              <code>如果 (下大雨 == 真的) {<br>&nbsp;&nbsp;花朵.掉落();<br>&nbsp;&nbsp;进入状态("第二幕");<br>}</code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Visual Canvas Area -->
+    <section class="lg:w-2/3 flex flex-col gap-4 z-10 relative">
+      <div class="bg-white rounded-3xl border border-stone-200/80 shadow-xl shadow-stone-200/50 overflow-hidden relative min-h-[480px] md:min-h-[550px] flex-grow flex flex-col justify-between">
+        
+        <div class="relative w-full flex-grow bg-gradient-to-b from-sky-50 to-amber-50/20 overflow-hidden" id="viewport">
+          
+          <!-- ==================== 一镜到底：全局统一画布 (Master Canvas) ==================== -->
+          <!-- 确保底层画布能穿透接收点击事件 -->
+          <svg id="master-canvas" class="absolute inset-0 w-full h-full transition-transform duration-[2.5s] ease-in-out object-cover pointer-events-none" viewBox="0 0 800 600" preserveAspectRatio="xMidYMax slice" style="transform-origin: 50% 60%;">
+            <defs>
+              <filter id="imagination-blur" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="15" />
+              </filter>
+            </defs>
+
+            <!-- 门缝底色 -->
+            <rect x="390" y="150" width="20" height="450" fill="#1c1917" />
+
+            <!-- [Layer 0] 邻家春色 -->
+            <g id="layer-imagined-colors" filter="url(#imagination-blur)" class="imagined-colors opacity-0 transition-opacity duration-700">
+              <rect x="370" y="100" width="60" height="400" fill="#fef08a" opacity="0.8"/>
+              <circle cx="400" cy="280" r="30" fill="#f43f5e" />
+              <circle cx="400" cy="330" r="25" fill="#facc15" />
+              <circle cx="400" cy="370" r="28" fill="#ec4899" />
+              <circle cx="400" cy="240" r="22" fill="#a855f7" />
+              <circle cx="400" cy="420" r="35" fill="#34d399" />
+              <circle cx="400" cy="190" r="40" fill="#60a5fa" />
+            </g>
+
+            <!-- [Layer 1] 一直存在的柴门背景 -->
+            <g id="layer-door">
+              <path d="M 0,200 L 300,200 L 300,600 L 0,600 Z" fill="#fafaf9" stroke="#e7e5e4" stroke-width="2"/>
+              <path d="M 500,200 L 800,200 L 800,600 L 500,600 Z" fill="#fafaf9" stroke="#e7e5e4" stroke-width="2"/>
+              <path d="M 0,170 L 310,170 L 310,200 L 0,200 Z" fill="#52525b"/>
+              <path d="M 490,170 L 800,170 L 800,200 L 490,200 Z" fill="#52525b"/>
+              <path d="M 290,140 L 510,140 L 510,600 L 500,600 L 500,150 L 300,150 L 300,600 L 290,600 Z" fill="#292524" />
+              
+              <g id="door-left">
+                <rect x="300" y="150" width="96" height="450" fill="#572718" stroke="#3b1509" stroke-width="2"/>
+                <rect x="315" y="180" width="66" height="100" fill="#78350f" />
+                <rect x="315" y="300" width="66" height="250" fill="#78350f" />
+                <circle cx="370" cy="360" r="14" fill="none" stroke="#b45309" stroke-width="3" />
+                <circle cx="370" cy="350" r="4" fill="#b45309" />
+              </g>
+              <g id="door-right">
+                <rect x="404" y="150" width="96" height="450" fill="#572718" stroke="#3b1509" stroke-width="2"/>
+                <rect x="419" y="180" width="66" height="100" fill="#78350f" />
+                <rect x="419" y="300" width="66" height="250" fill="#78350f" />
+                <circle cx="430" cy="360" r="14" fill="none" stroke="#b45309" stroke-width="3" />
+                <circle cx="430" cy="350" r="4" fill="#b45309" />
+              </g>
+
+              <rect x="396" y="150" width="2" height="450" fill="#111" opacity="0.6"/>
+              <rect x="402" y="150" width="2" height="450" fill="#111" opacity="0.6"/>
+            </g>
+
+            <!-- [Layer 2] 缩小后的全局小灌木背景 -->
+            <g id="layer-bushes" transform="translate(60, 90) scale(0.85)">
+              <path d="M -100,600 A 200,200 0 0,1 300,600 Z" fill="#047857" opacity="0.9"/>
+              <path d="M 150,600 A 220,220 0 0,1 550,600 Z" fill="#065f46" opacity="0.95"/>
+              <path d="M 400,600 A 180,180 0 0,1 750,600 Z" fill="#064e3b" opacity="0.8"/>
+              <path d="M 600,600 A 150,150 0 0,1 900,600 Z" fill="#047857" opacity="0.9"/>
+              <path d="M 50,600 A 120,120 0 0,1 250,600 Z" fill="#10b981" opacity="0.7"/>
+            </g>
+
+            <!-- [Layer 3] 一直存在的主树枝和树叶 -->
+            <g id="layer-tree-wrapper" transform="translate(150, 360) scale(1.4)">
+              <g id="layer-tree" class="sway pointer-events-auto" style="transform-origin: 200px 200px;">
+                <!-- 枝干 -->
+                <path d="M 80,200 Q 100,140 60,80" fill="none" stroke="#6b5741" stroke-width="4.5" stroke-linecap="round"/>
+                <path d="M 90,170 Q 130,130 120,90" fill="none" stroke="#6b5741" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 200,200 Q 180,110 170,50" fill="none" stroke="#574a3f" stroke-width="5" stroke-linecap="round"/>
+                <path d="M 190,140 Q 230,100 230,60" fill="none" stroke="#574a3f" stroke-width="4" stroke-linecap="round"/>
+                <path d="M 180,90 Q 150,80 140,60" fill="none" stroke="#574a3f" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 320,200 Q 350,140 360,80" fill="none" stroke="#6b5741" stroke-width="4.5" stroke-linecap="round"/>
+                <path d="M 335,160 Q 300,120 290,90" fill="none" stroke="#6b5741" stroke-width="3.5" stroke-linecap="round"/>
+
+                <!-- 树叶 -->
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 60px 80px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 60,80 Q 40,70 30,90 Q 50,100 60,80 Z" fill="#4d7c0f"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 120px 90px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 120,90 Q 140,80 150,100 Q 130,110 120,90 Z" fill="#15803d"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 80px 120px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 80,120 Q 60,110 50,130 Q 70,140 80,120 Z" fill="#166534"/>
+                </g>
+                
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 170px 50px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 170,50 Q 150,40 140,60 Q 160,70 170,50 Z" fill="#4d7c0f"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 230px 60px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 230,60 Q 250,50 260,70 Q 240,80 230,60 Z" fill="#15803d"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 140px 60px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 140,60 Q 120,50 110,70 Q 130,80 140,60 Z" fill="#166534"/>
+                </g>
+
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 360px 80px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 360,80 Q 380,70 390,90 Q 370,100 360,80 Z" fill="#4d7c0f"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 290px 90px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 290,90 Q 270,80 260,100 Q 280,110 290,90 Z" fill="#15803d"/>
+                </g>
+                <g class="interactive-leaf cursor-pointer transition-transform" style="transform-origin: 340px 120px;" onclick="shakeLeaf(event, this)">
+                  <path d="M 340,120 Q 360,110 370,130 Q 350,140 340,120 Z" fill="#166534"/>
+                </g>
+              </g>
+            </g>
+
+            <!-- [Layer 4] Scene 1 专属：花苞。 -->
+            <g id="layer-buds-wrapper" transform="translate(150, 360) scale(1.4)">
+              <g id="layer-buds" class="sway transition-opacity duration-700 pointer-events-auto" style="transform-origin: 200px 200px;">
+                <g id="bud-group-1" style="transform-origin: 60px 80px;">
+                  <path id="bud-petal-1" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(1)" d="M 60,80 Q 50,55 60,50 Q 70,55 60,80" fill="#f43f5e" style="transform-origin: 60px 80px;" />
+                </g>
+                <g id="bud-group-2" style="transform-origin: 120px 90px;">
+                  <path id="bud-petal-2" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(2)" d="M 120,90 Q 110,65 120,60 Q 130,65 120,90" fill="#f43f5e" style="transform-origin: 120px 90px;" />
+                </g>
+                <g id="bud-group-3" style="transform-origin: 170px 50px;">
+                  <path id="bud-petal-3" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(3)" d="M 170,50 Q 160,25 170,20 Q 180,25 170,50" fill="#f43f5e" style="transform-origin: 170px 50px;" />
+                </g>
+                <g id="bud-group-4" style="transform-origin: 230px 60px;">
+                  <path id="bud-petal-4" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(4)" d="M 230,60 Q 220,35 230,30 Q 240,35 230,60" fill="#f43f5e" style="transform-origin: 230px 60px;" />
+                </g>
+                <g id="bud-group-5" style="transform-origin: 140px 60px;">
+                  <path id="bud-petal-5" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(5)" d="M 140,60 Q 130,35 140,30 Q 150,35 140,60" fill="#f43f5e" style="transform-origin: 140px 60px;" />
+                </g>
+                <g id="bud-group-6" style="transform-origin: 360px 80px;">
+                  <path id="bud-petal-6" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(6)" d="M 360,80 Q 350,55 360,50 Q 370,55 360,80" fill="#f43f5e" style="transform-origin: 360px 80px;" />
+                </g>
+                <g id="bud-group-7" style="transform-origin: 290px 90px;">
+                  <path id="bud-petal-7" class="cursor-pointer transition-transform duration-300" onclick="revealPistil(7)" d="M 290,90 Q 280,65 290,60 Q 300,65 290,90" fill="#f43f5e" style="transform-origin: 290px 90px;" />
+                </g>
+              </g>
+            </g>
+
+            <!-- [Layer 5] Scene 3 专属：昆虫 -->
+            <g id="layer-insects" class="transition-opacity duration-700 opacity-0 pointer-events-none">
+              <!-- 蜜蜂 -->
+              <g id="interactive-bee" class="bee-hover pointer-events-none" style="transform-origin: 0px 0px; transform: translate(-150px, 180px);">
+                <ellipse cx="-4" cy="-10" rx="4" ry="10" fill="#e0f2fe" fill-opacity="0.8" transform="rotate(-30)" class="origin-bottom"/>
+                <ellipse cx="4" cy="-10" rx="4" ry="10" fill="#e0f2fe" fill-opacity="0.8" transform="rotate(30)" class="origin-bottom"/>
+                <ellipse cx="0" cy="0" rx="14" ry="10" fill="#fbbf24"/>
+                <path d="M -6, -9 Q -4, 0 -6, 9 M 0, -10 Q 2, 0 0, 10 M 6, -9 Q 8, 0 6, 9" fill="none" stroke="#1e293b" stroke-width="2.5"/>
+                <circle cx="10" cy="-3" r="2" fill="#0f172a"/>
+                <polygon points="-14,0 -18,-2 -14,-4" fill="#0f172a"/>
+              </g>
+
+              <!-- 蛱蝶 -->
+              <g id="interactive-butterfly" class="pointer-events-none" style="transform-origin: 0px 0px; transform: translate(-100px, 150px);">
+                <path d="M 0, -12 Q -5, -25 -12, -28" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+                <path d="M 0, -12 Q 5, -25 12, -28" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+                <g class="butterfly-wing-left">
+                  <path d="M 0, -5 C -15, -35 -40, -30 -35, -5 C -32, 5 -15, 0 0, -5" fill="#0284c7" opacity="0.95"/>
+                  <path d="M -8, -10 C -18, -25 -32, -22 -28, -8" fill="#38bdf8"/>
+                  <path d="M 0, 3 C -12, 10 -28, 15 -25, 0 C -22, -10 -10, -5 0, 3" fill="#0369a1" opacity="0.95"/>
+                  <circle cx="-12" cy="4" r="3" fill="#facc15"/>
+                </g>
+                <g class="butterfly-wing-right">
+                  <path d="M 0, -5 C 15, -35 40, -30 35, -5 C 32, 5 15, 0 0, -5" fill="#0284c7" opacity="0.95"/>
+                  <path d="M 8, -10 C 18, -25 32, -22 28, -8" fill="#38bdf8"/>
+                  <path d="M 0, 3 C 12, 10 28, 15 25, 0 C 22, -10 10, -5 0, 3" fill="#0369a1" opacity="0.95"/>
+                  <circle cx="12" cy="4" r="3" fill="#facc15"/>
+                </g>
+                <ellipse cx="0" cy="0" rx="3" ry="12" fill="#1e293b"/>
+                <circle cx="0" cy="-12" r="3.5" fill="#0f172a"/>
+              </g>
+            </g>
+          </svg>
+
+          <!-- 物理层：动态雨水 -->
+          <div class="absolute inset-0 pointer-events-none z-20" id="rain-layer-1"></div>
+          <!-- 物理层：甩出的水滴容器 -->
+          <div class="absolute inset-0 pointer-events-none z-20" id="drop-layer"></div>
+
+          <!-- ==================== UI层：各场景的交互面板 ==================== -->
+          
+          <!-- UI: Scene 1 乌云与降雨 -->
+          <div id="ui-scene-1" class="absolute inset-0 z-30 transition-opacity duration-700 pointer-events-none">
+            <!-- 可点击的乌云层 -->
+            <div class="cursor-pointer absolute top-0 left-0 w-full h-48 group pointer-events-auto z-50" id="cloud-click-zone" onclick="toggleRainSequence()">
+              <!-- 云朵渲染 -->
+              <svg class="absolute top-2 left-[-5%] w-64 h-32 text-slate-400 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-500" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              <svg class="absolute -top-4 left-[15%] w-72 h-36 text-slate-500 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-600" style="animation-delay: -2s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              <svg class="absolute top-8 left-[35%] w-56 h-28 text-slate-400 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-500" style="animation-delay: -4s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              <svg class="absolute -top-2 left-[55%] w-80 h-40 text-slate-500 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-600" style="animation-delay: -1s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              <svg class="absolute top-6 left-[75%] w-60 h-30 text-slate-400 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-500" style="animation-delay: -5s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              <svg class="absolute -top-6 right-[-10%] w-64 h-32 text-slate-500 drop-shadow-md cloud-anim fill-current transition-colors duration-500 group-hover:text-slate-600" style="animation-delay: -3s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              
+              <span id="rain-trigger-hint" class="absolute bottom-[-10px] left-1/2 -translate-x-1/2 text-[10px] text-stone-600 bg-white/90 px-3 py-1 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm border border-stone-200">点击天空降下春雨</span>
+            </div>
+
+            <!-- 提示文字面板 -->
+            <div class="p-4 md:p-6 absolute pointer-events-none" id="hint-scene-1">
+              <div class="text-stone-400 text-xs font-sans bg-white/70 px-3 py-1 inline-block rounded-full shadow-sm backdrop-blur-sm pointer-events-auto">
+                💡 提示：点击天空的乌云 或 树上的花苞，触发一连串的连锁反应！
+              </div>
+            </div>
+          </div>
+
+          <!-- UI: Scene 2 雨后抖水 -->
+          <div id="ui-scene-2" class="absolute inset-0 z-30 transition-opacity duration-700 opacity-0 pointer-events-none">
+            <div class="p-4 md:p-6 opacity-30" id="shared-clouds-faded">
+              <div class="absolute top-0 left-0 w-full h-48 pointer-events-none">
+                <svg class="absolute top-2 left-[-5%] w-64 h-32 text-slate-400 drop-shadow-md cloud-anim fill-current" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+                <svg class="absolute -top-2 left-[55%] w-80 h-40 text-slate-500 drop-shadow-md cloud-anim fill-current" style="animation-delay: -1s;" viewBox="0 0 100 60"><path d="M10,40 Q10,25 25,25 Q30,12 48,15 Q65,10 75,25 Q90,25 90,40 Q90,52 75,52 L25,52 Q10,52 10,40 Z" /></svg>
+              </div>
+            </div>
+            <div class="p-4 md:p-6 pointer-events-none">
+              <div class="text-sky-600 text-xs font-sans bg-sky-50/90 border border-sky-100 px-3 py-1 inline-block rounded-full shadow-sm backdrop-blur-sm pointer-events-auto">
+                💡 提示：雨停了，试试点击那些挂满水珠的绿油油树叶！
+              </div>
+            </div>
+          </div>
+
+          <!-- UI: Scene 3 蝴蝶飞离 -->
+          <div id="ui-scene-3" class="absolute inset-0 z-30 transition-opacity duration-700 opacity-0 pointer-events-none">
+            <div class="p-4 md:p-6 pointer-events-none">
+              <div class="text-stone-400 text-xs font-sans bg-white/70 px-3 py-1 inline-block rounded-full shadow-sm backdrop-blur-sm pointer-events-auto">
+                💡 提示：看！停在光秃秃树枝上的蛱蝶。
+              </div>
+            </div>
+            
+            <div id="butterfly-click-zone" class="absolute inset-0 pointer-events-auto cursor-pointer" onclick="handleButterflyClick()"></div>
+            
+            <div id="butterfly-flight-tutorial" class="absolute bottom-16 bg-white/95 border border-amber-100 rounded-2xl px-5 py-3 text-stone-700 text-xs shadow-lg font-sans text-center max-w-sm pointer-events-none transition-opacity duration-300">
+              <span class="block font-bold text-amber-800 mb-1">🦋 瞧！刚刚飞来停在树枝上的蛱蝶。</span>
+              点击画面任意一处，让它飞向邻居家的门缝寻找春天吧。
+            </div>
+          </div>
+
+          <!-- UI: Scene 4 门缝透视 -->
+          <div id="ui-scene-4" class="absolute inset-0 z-30 transition-opacity duration-700 opacity-0 pointer-events-none">
+            <div class="p-4 md:p-6 pointer-events-none">
+              <div class="text-stone-400 text-xs font-sans bg-white/70 px-3 py-1 inline-block rounded-full shadow-sm backdrop-blur-sm pointer-events-auto">
+                💡 提示：点击眼前这扇紧闭的中式木门，悄悄“凑近”门缝看一看！
+              </div>
+            </div>
+            
+            <div id="door-click-zone" class="absolute inset-0 pointer-events-auto cursor-pointer" onclick="handleDoorZoom()"></div>
+
+            <div id="door-tutorial-bubble" class="absolute bottom-24 bg-white/95 border border-emerald-100 rounded-2xl px-5 py-3 text-stone-700 text-xs shadow-lg font-sans text-center transition-opacity pointer-events-none">
+              <span class="block font-bold text-emerald-800 mb-1">🚪 庭院深深，一扇柴门</span>
+              诗人并没有长透视眼。<br>点击大门，像解题一样悄悄凑近门缝，<br>看看能推导（想象）出怎样的春色？
+            </div>
+
+            <div class="absolute bottom-6 bg-white/95 border border-rose-100 rounded-2xl p-4 max-w-md text-stone-700 text-xs shadow-xl font-sans text-center pointer-events-none">
+              <span class="block font-bold text-emerald-800 text-sm mb-1">“却疑春色在邻家”</span>
+              这里用到了逻辑里超酷的“合理猜想”！门缝里毛玻璃般的斑斓，全是他结合蝴蝶飞过这一线索产生的浪漫想象。
+            </div>
+          </div>
+
+          <!-- UI: Scene 5 意境大图赏析 -->
+          <div id="ui-scene-5" class="absolute inset-0 z-30 transition-opacity duration-700 opacity-0 pointer-events-none flex flex-col justify-end">
+            <!-- 展示 01.jpg -->
+            <img src="01.jpg" alt="雨晴全图意境" class="absolute inset-0 w-full h-full object-cover">
+            <!-- 渐变阴影方便看清文字 -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+            <!-- 诗词配文 -->
+            <div class="relative z-10 p-6 text-center text-white pb-8">
+              <h2 class="text-3xl font-bold font-poetic text-amber-300 tracking-wider mb-2">雨晴</h2>
+              <p class="text-xs text-amber-200/80 mb-4">[唐] 王驾</p>
+              <div class="space-y-1 font-poetic font-bold text-xl tracking-wider">
+                <p>雨前初见花间蕊，雨后兼无叶里花。</p>
+                <p>蛱蝶飞来过墙去，却疑春色在邻家。</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footnote / Action Area Inside Card -->
+        <footer class="p-4 bg-stone-50 border-t border-stone-200/60 flex flex-col md:flex-row justify-between items-center gap-3">
+          <div class="flex items-center gap-2">
+            <!-- Navigation Indicator Dots -->
+            <div class="flex gap-2" id="scene-dots">
+              <button onclick="switchScene(1)" class="w-3 h-3 rounded-full bg-emerald-600 transition-all" id="dot-1"></button>
+              <button onclick="switchScene(2)" class="w-3 h-3 rounded-full bg-stone-300 transition-all" id="dot-2"></button>
+              <button onclick="switchScene(3)" class="w-3 h-3 rounded-full bg-stone-300 transition-all" id="dot-3"></button>
+              <button onclick="switchScene(4)" class="w-3 h-3 rounded-full bg-stone-300 transition-all" id="dot-4"></button>
+              <button onclick="switchScene(5)" class="w-3 h-3 rounded-full bg-stone-300 transition-all" id="dot-5"></button>
+            </div>
+            <span class="text-xs text-stone-500 font-sans ml-2" id="scene-indicator">当前场景 1/5：雨前初见花间蕊</span>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="btn-prev-scene" onclick="prevScene()" class="px-3.5 py-1.5 border border-stone-300 rounded-lg text-xs hover:bg-stone-100 active:scale-95 transition-all font-sans">
+              上一步
+            </button>
+            <button id="btn-next-scene-control" onclick="nextScene()" class="px-4 py-1.5 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-xs active:scale-95 transition-all font-sans shadow-md">
+              下一步
+            </button>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive notification pop-ups -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-2 bg-stone-900 text-stone-100 text-xs font-sans rounded-xl opacity-0 transform translate-y-2 pointer-events-none transition-all duration-300 shadow-lg z-50">
+    提示信息
+  </div>
+
+  <script>
+    let currentScene = 1;
+    let rainInterval = null;
+    let isRaining = false;
+    let isResting = true; 
+    let hasFlownAway = false; // 新增记忆芯片：记录蝴蝶是否已经飞进门里了
+
+    const poemLines = [
+      "雨前初见花间蕊",
+      "雨后全无叶底花",
+      "蛱蝶飞来过墙去",
+      "却疑春色在邻家"
+    ];
+
+    const sceneDescriptions = [
+      "当前场景 1/5：雨前初见花间蕊",
+      "当前场景 2/5：雨后全无叶底花",
+      "当前场景 3/5：蛱蝶飞来过墙去",
+      "当前场景 4/5：却疑春色在邻家",
+      "当前场景 5/5：雨晴全图意境赏析"
+    ];
+
+    window.onload = function() {
+      switchScene(1);
+    };
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.remove('opacity-0', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
+    }
+
+    function speakPoem() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        let utteranceText = `雨晴，唐，王驾。${poemLines[0]}。${poemLines[1]}。${poemLines[2]}。${poemLines[3]}。`;
+        let utterance = new SpeechSynthesisUtterance(utteranceText);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.85; 
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+        showToast("🔊 正在为您吟诵古诗...");
+      } else {
+        showToast("⚠️ 您的浏览器不支持语音朗读");
+      }
+    }
+
+    // ========== 状态机核心控制 ==========
+    function switchScene(sceneNumber, autoTransition = false) {
+      currentScene = sceneNumber;
+      
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`btn-scene-${i}`);
+        const dot = document.getElementById(`dot-${i}`);
+        const uiLayer = document.getElementById(`ui-scene-${i}`);
+        
+        if (i === sceneNumber) {
+          btn.classList.add('border-emerald-600', 'bg-emerald-50/50');
+          btn.classList.remove('border-transparent', 'bg-stone-50/50', 'hover:border-stone-300');
+          dot.classList.add('bg-emerald-600', 'w-6');
+          dot.classList.remove('bg-stone-300', 'w-3');
+          if (uiLayer) {
+            // 永远不要修改最外层容器的 pointer-events-none
+            // 我们通过控制 opacity 和 visibility 来让图层显示和隐退！
+            uiLayer.classList.remove('opacity-0');
+            uiLayer.classList.add('opacity-100');
+            uiLayer.style.visibility = 'visible';
+          }
+        } else {
+          btn.classList.remove('border-emerald-600', 'bg-emerald-50/50');
+          btn.classList.add('border-transparent', 'bg-stone-50/50', 'hover:border-stone-300');
+          dot.classList.remove('bg-emerald-600', 'w-6');
+          dot.classList.add('bg-stone-300', 'w-3');
+          if (uiLayer) {
+            uiLayer.classList.add('opacity-0');
+            uiLayer.classList.remove('opacity-100');
+            // 延时隐藏，完美过渡
+            setTimeout(() => {
+               if (currentScene !== i) uiLayer.style.visibility = 'hidden';
+            }, 700);
+          }
+        }
+      }
+      document.getElementById('scene-indicator').innerText = sceneDescriptions[sceneNumber - 1];
+
+      const layerBuds = document.getElementById('layer-buds');
+      const layerInsects = document.getElementById('layer-insects');
+      const layerColors = document.getElementById('layer-imagined-colors');
+      const masterCanvas = document.getElementById('master-canvas');
+
+      // 动态修改按钮文字
+      const nextBtn = document.getElementById('btn-next-scene-control');
+      if (sceneNumber === 5) {
+        nextBtn.innerText = "重新体验";
+      } else {
+        nextBtn.innerText = "下一步";
+      }
+
+      // ----- Scene 1 -----
+      if (sceneNumber === 1) {
+        if (!autoTransition) {
+           isRaining = false;
+           clearInterval(rainInterval);
+           document.getElementById('rain-layer-1').innerHTML = '';
+           layerBuds.classList.remove('opacity-0', 'pointer-events-none');
+           for(let i=1; i<=7; i++) {
+             document.getElementById('bud-group-'+i).classList.remove('bud-falling', 'bud-hidden');
+           }
+        }
+      } 
+
+      // ----- Scene 2 -----
+      if (sceneNumber === 2) {
+        if (!autoTransition) {
+           layerBuds.classList.add('opacity-0', 'pointer-events-none');
+        }
+      }
+
+      // ----- Scene 3 -----
+      if (sceneNumber === 3) {
+        layerBuds.classList.add('opacity-0', 'pointer-events-none');
+        layerInsects.classList.remove('opacity-0');
+        
+        const butterfly = document.getElementById('interactive-butterfly');
+        const bee = document.getElementById('interactive-bee');
+        
+        butterfly.classList.remove('fly-out-active');
+        bee.classList.remove('bee-fly-out-active');
+        void butterfly.offsetWidth; 
+        void bee.offsetWidth;
+        
+        butterfly.classList.add('fly-in-active');
+        bee.classList.add('bee-fly-in-active');
+        isResting = true; 
+        hasFlownAway = false; // 每次重新进入第三幕，都要重置这段记忆
+
+        document.getElementById('butterfly-click-zone').classList.remove('pointer-events-none');
+        const tut = document.getElementById('butterfly-flight-tutorial');
+        if (tut) tut.style.opacity = '1';
+
+      } else {
+        layerInsects.classList.add('opacity-0');
+        document.getElementById('butterfly-click-zone').classList.add('pointer-events-none');
+      }
+
+      // ----- Scene 4 -----
+      if (sceneNumber === 4) {
+        layerBuds.classList.add('opacity-0', 'pointer-events-none');
+        layerColors.classList.remove('opacity-0'); 
+        document.getElementById('door-click-zone').classList.remove('pointer-events-none');
+      } else {
+        layerColors.classList.add('opacity-0');
+        masterCanvas.classList.remove('door-zoomed'); 
+        document.getElementById('door-click-zone').classList.add('pointer-events-none');
+      }
+
+      // ----- Scene 5 -----
+      if (sceneNumber === 5) {
+        layerBuds.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function nextScene() {
+      if (currentScene < 5) switchScene(currentScene + 1);
+      else switchScene(1);
+    }
+
+    function prevScene() {
+      if (currentScene > 1) switchScene(currentScene - 1);
+      else switchScene(5);
+    }
+
+    // ==================== SCENE 1 & 2 联动逻辑 ====================
+    function toggleRainSequence() {
+      if (currentScene !== 1 || isRaining) return;
+      
+      isRaining = true;
+      showToast("⛈️ 轰隆隆...春雨落下来啦！请注意观察花苞的变化。");
+      
+      const rainLayer = document.getElementById('rain-layer-1');
+      rainLayer.innerHTML = '';
+      
+      let rainCount = 0;
+      rainInterval = setInterval(() => {
+        for(let i=0; i<6; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'absolute bg-sky-300/50 rounded-full rain-drop z-10';
+          drop.style.width = '1.5px';
+          drop.style.height = '20px';
+          drop.style.left = `${Math.random() * 100}%`;
+          drop.style.top = `-20px`;
+          drop.style.animationDuration = `${0.4 + Math.random() * 0.4}s`;
+          rainLayer.appendChild(drop);
+          setTimeout(() => drop.remove(), 1000);
+        }
+        rainCount++;
+      }, 100);
+
+      setTimeout(() => {
+        for(let i=1; i<=7; i++) {
+          setTimeout(() => {
+            const bud = document.getElementById('bud-group-'+i);
+            bud.classList.add('bud-falling');
+          }, Math.random() * 1500); 
+        }
+      }, 1500);
+
+      setTimeout(() => {
+        clearInterval(rainInterval);
+        isRaining = false;
+        
+        switchScene(2, true); 
+        showToast("☀️ 雨过天晴...哎呀，花骨朵都被雨水打落了，只剩下一树绿叶。");
+      }, 4500);
+    }
+
+    function revealPistil(budId) {
+      if (currentScene !== 1 || isRaining) return;
+      const petal = document.getElementById(`bud-petal-${budId}`);
+      if(petal) {
+        petal.style.transform = "scale(1.15) rotate(-2deg)";
+      }
+      showToast("🌸 细心观察，小巧的花苞似乎因为你的触碰，微微饱满了一些！");
+    }
+
+    function shakeLeaf(event, leafElement) {
+      if (currentScene !== 2) return; 
+
+      leafElement.classList.remove('leaf-shaking');
+      void leafElement.offsetWidth; 
+      leafElement.classList.add('leaf-shaking');
+
+      const drop = document.createElement('div');
+      drop.className = 'absolute bg-sky-200/80 rounded-full water-drop z-20';
+      drop.style.width = '6px';
+      drop.style.height = '6px';
+      
+      const viewport = document.getElementById('viewport').getBoundingClientRect();
+      const dropX = (event.touches ? event.touches[0].clientX : event.clientX) - viewport.left;
+      const dropY = (event.touches ? event.touches[0].clientY : event.clientY) - viewport.top;
+
+      drop.style.left = `${dropX}px`;
+      drop.style.top = `${dropY}px`;
+      
+      document.getElementById('drop-layer').appendChild(drop);
+      setTimeout(() => drop.remove(), 600);
+      
+      showToast("💧 摇一摇树叶，晶莹的水滴落下了。好像引年来了一位蝴蝶小客人？");
+
+      // 利用定时器，在水滴落下1.5秒后，自动推进到第三幕（蝴蝶飞来）
+      setTimeout(() => {
+        if (currentScene === 2) {
+          switchScene(3, true);
+        }
+      }, 1500);
+    }
+
+    // ==================== SCENE 3 LOGIC ====================
+    function handleButterflyClick() {
+      if (currentScene !== 3) return;
+
+      const butterfly = document.getElementById('interactive-butterfly');
+      const bee = document.getElementById('interactive-bee');
+      const tut = document.getElementById('butterfly-flight-tutorial');
+
+      // 状态3：蝴蝶已经飞走。点击画面直接自动切入第四幕并拉近镜头！
+      if (hasFlownAway) {
+        switchScene(4, true);
+        setTimeout(() => {
+          handleDoorZoom();
+        }, 100); // 稍微等0.1秒，确保场景切换完毕后再拉近镜头
+        return;
+      }
+
+      // 状态2：蝴蝶正在努力飞行途中，为了不发生故障，我们不打断它
+      if (!isResting) {
+        showToast("🦋 蛱蝶正在努力飞向大门，请稍等...");
+        return;
+      }
+
+      // 状态1：起飞出发
+      isResting = false;
+      if (tut) tut.style.opacity = '0';
+      showToast("🦋 蛱蝶和蜜蜂离开树枝起飞了，它们正飞向大门深处...");
+
+      butterfly.classList.remove('fly-in-active');
+      bee.classList.remove('bee-fly-in-active');
+      void butterfly.offsetWidth;
+      void bee.offsetWidth;
+
+      butterfly.classList.add('fly-out-active');
+      
+      setTimeout(() => {
+        if (!isResting) bee.classList.add('bee-fly-out-active');
+      }, 400);
+
+      setTimeout(() => {
+        if (!isResting) {
+          hasFlownAway = true; // 飞行结束，写入记忆！
+          showToast("✨ 蛱蝶已经顺着门缝飞去隔壁啦！【再次点击画面】，悄悄凑近门缝去看看吧！");
+        }
+      }, 4000);
+    }
+
+    // ==================== SCENE 4 LOGIC ====================
+    function handleDoorZoom() {
+      if (currentScene !== 4) return;
+
+      const masterCanvas = document.getElementById('master-canvas');
+      const tut = document.getElementById('door-tutorial-bubble');
+
+      if (masterCanvas.classList.contains('door-zoomed')) {
+        masterCanvas.classList.remove('door-zoomed');
+        showToast("🔙 镜头退回院中。诗人留下了悬念，你能猜对门后的风景吗？");
+        if (tut) tut.style.opacity = '1';
+      } else {
+        masterCanvas.classList.add('door-zoomed');
+        if (tut) tut.style.opacity = '0';
+        showToast("✨ 透过门缝...这朦胧斑斓的色彩，正是诗人脑海中想象出的邻家春色！");
+      }
+    }
+  </script>
+</body>
+</html>
