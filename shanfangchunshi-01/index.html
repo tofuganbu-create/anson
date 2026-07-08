@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岑参《山房春事》四幕互动绘本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow-x: hidden; background-color: #faf5f0; font-family: 'KaiTi', '楷体', serif; touch-action: manipulation; }
+        
+        /* 隐藏和显示用的类 */
+        .hidden-scene { display: none !important; opacity: 0; transition: opacity 0.5s; }
+        .active-scene { display: block; opacity: 1; transition: opacity 0.5s; }
+        
+        /* 动画关键帧 */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(4deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        @keyframes sun-glow {
+            0% { filter: drop-shadow(0 0 10px #FFD700); }
+            50% { filter: drop-shadow(0 0 25px #FF8C00); }
+            100% { filter: drop-shadow(0 0 10px #FFD700); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes petal-fall {
+            0% { transform: translateY(-20px) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(250px) translateX(100px); opacity: 0; }
+        }
+
+        @keyframes fly-random {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(40px, -30px) rotate(15deg); }
+            40% { transform: translate(80px, 10px) rotate(-10deg); }
+            60% { transform: translate(10px, 50px) rotate(25deg); }
+            80% { transform: translate(-30px, 20px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes wing-flap {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(0.2); }
+        }
+
+        /* 具体元素的动画应用 */
+        .sun-fx { animation: sun-glow 3s infinite; }
+        .sparkle-fx { transform-origin: center; animation: sparkle 2s infinite ease-in-out; }
+        .petal-fx { transform-origin: center; animation: petal-fall 6s infinite linear; }
+        .willow-branch { transform-origin: top center; transition: transform 0.5s ease; }
+        .willow-sway { animation: sway 4s infinite ease-in-out; }
+        
+        .bug-wing { transform-origin: center; }
+        .flying .bug-wing { animation: wing-flap 0.3s infinite; }
+        .flying { animation: fly-random 6s infinite ease-in-out; }
+
+        /* 标签样式 */
+        .poem-tag {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #d97706;
+            color: #b45309;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            pointer-events: none;
+        }
+
+        /* 拖拽元素样式 */
+        .draggable { cursor: grab; touch-action: none; position: absolute; z-index: 50; }
+        .draggable:active { cursor: grabbing; }
+
+        /* 消息提示框 */
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #ffedd5; border: 2px solid #fdba74; color: #9a3412;
+            padding: 10px 20px; border-radius: 20px; font-weight: bold;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-2 md:p-6 text-slate-800">
+
+    <div id="toast">提示信息</div>
+
+    <div class="max-w-5xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col border-4 border-orange-100">
+        
+        <!-- 诗句导航条 -->
+        <div class="bg-orange-50 flex flex-wrap justify-center items-center p-4 gap-2 md:gap-4 border-b border-orange-200" id="poem-nav">
+            <a href="../index.html" class="flex items-center gap-1 text-stone-600 hover:text-orange-700 bg-white hover:bg-orange-100 active:scale-95 transition-all px-3 py-1.5 rounded-full text-xs font-bold border border-orange-200/60 mr-2 shadow-sm font-sans">
+                <span>🏠</span>
+                <span>返回主页</span>
+            </a>
+            <div class="text-xl font-bold text-orange-900 mr-4">《山房春事》</div>
+            <button class="nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-orange-500 text-white shadow-md" data-scene="1">风恬日暖荡春光</button>
+            <button class="nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-white text-gray-500 border border-gray-300 hover:bg-orange-100" data-scene="2">戏蝶游蜂乱入房</button>
+            <button class="nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-white text-gray-500 border border-gray-300 hover:bg-orange-100" data-scene="3">数枝门柳低衣桁</button>
+            <button class="nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-white text-gray-500 border border-gray-300 hover:bg-orange-100" data-scene="4">一片山花落笔床</button>
+        </div>
+
+        <!-- 主视觉区 (画布与拖拽层容器) -->
+        <div class="relative w-full bg-blue-50" style="padding-top: 60%;" id="canvas-wrapper">
+            <div id="interactive-area" class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                
+                <!-- SVG 背景与静止元素 -->
+                <svg width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" class="absolute top-0 left-0">
+                    
+                    <!-- 1. 室外风景区 (窗外) -->
+                    <!-- 天空与远山 -->
+                    <rect x="0" y="0" width="1000" height="400" fill="#e0f7fa" />
+                    <path d="M0,350 Q200,250 450,350 T1000,320 L1000,600 L0,600 Z" fill="#b2dfdb" />
+                    <path d="M0,400 Q300,320 600,420 T1000,380 L1000,600 L0,600 Z" fill="#80cbc4" />
+                    
+                    <!-- 太阳 (Scene 1 景物一直显示) -->
+                    <g id="scene1-sun">
+                        <circle cx="720" cy="120" r="40" fill="#FFD700" class="sun-fx" />
+                        <foreignObject id="scene1-sun-tag" x="680" y="170" width="80" height="40" class="active-scene">
+                            <div class="poem-tag text-center">日暖</div>
+                        </foreignObject>
+                    </g>
+
+                    <!-- 远处的花树与灌木 (景物一直显示) -->
+                    <g id="scene1-flowers">
+                        <!-- 1. 深深浅浅的绿色半圆形灌木 (增加连绵的层次) -->
+                        <path d="M 450,420 A 40,40 0 0,1 540,420 Z" fill="#388e3c" />
+                        <path d="M 700,420 A 60,60 0 0,1 840,420 Z" fill="#2e7d32" />
+                        <path d="M 480,420 A 55,55 0 0,1 600,420 Z" fill="#4caf50" />
+                        
+                        <!-- 原有深绿底色 -->
+                        <path d="M 560,420 A 50,50 0 0,1 660,420 Z" fill="#2e7d32" />
+                        <path d="M 630,420 A 60,60 0 0,1 750,420 Z" fill="#1b5e20" />
+                        <!-- 原有浅绿与嫩绿层次 -->
+                        <path d="M 590,420 A 45,45 0 0,1 680,420 Z" fill="#4caf50" />
+                        <path d="M 660,420 A 40,40 0 0,1 740,420 Z" fill="#81c784" />
+                        
+                        <!-- 新增更多层次，让灌木更丰满 -->
+                        <path d="M 520,420 A 45,45 0 0,1 620,420 Z" fill="#aed581" />
+                        <path d="M 710,420 A 45,45 0 0,1 810,420 Z" fill="#8bc34a" />
+                        
+                        <!-- 2. 伸展的树枝 -->
+                        <!-- 新增左侧和右侧枝条 -->
+                        <path d="M 510,420 Q 480,380 470,350 M 520,390 Q 530,370 540,360" fill="none" stroke="#4e342e" stroke-width="3" stroke-linecap="round" />
+                        <path d="M 770,420 Q 790,370 810,340 M 760,390 Q 740,360 730,350" fill="none" stroke="#5d4037" stroke-width="3" stroke-linecap="round" />
+                        <!-- 原有枝条 -->
+                        <path d="M 610,420 Q 590,370 580,340 M 610,380 Q 630,360 640,345" fill="none" stroke="#5d4037" stroke-width="4" stroke-linecap="round" />
+                        <path d="M 690,420 Q 700,370 720,330 M 695,380 Q 680,360 670,350" fill="none" stroke="#4e342e" stroke-width="3" stroke-linecap="round" />
+                        
+                        <!-- 3. 新生的树叶 -->
+                        <!-- 新增枝条叶片 -->
+                        <ellipse cx="470" cy="350" rx="10" ry="5" fill="#8bc34a" transform="rotate(-30 470 350)" />
+                        <ellipse cx="540" cy="360" rx="9" ry="4.5" fill="#cddc39" transform="rotate(20 540 360)" />
+                        <ellipse cx="810" cy="340" rx="11" ry="5.5" fill="#4caf50" transform="rotate(40 810 340)" />
+                        <ellipse cx="730" cy="350" rx="10" ry="5" fill="#8bc34a" transform="rotate(-15 730 350)" />
+                        <!-- Left twigs -->
+                        <ellipse cx="580" cy="340" rx="12" ry="6" fill="#8bc34a" transform="rotate(-20 580 340)" />
+                        <ellipse cx="570" cy="350" rx="10" ry="5" fill="#4caf50" transform="rotate(-60 570 350)" />
+                        <ellipse cx="640" cy="345" rx="10" ry="5" fill="#cddc39" transform="rotate(30 640 345)" />
+                        <!-- Right twigs -->
+                        <ellipse cx="720" cy="330" rx="14" ry="7" fill="#8bc34a" transform="rotate(-40 720 330)" />
+                        <ellipse cx="730" cy="345" rx="10" ry="5" fill="#4caf50" transform="rotate(-10 730 345)" />
+                        <ellipse cx="670" cy="350" rx="9" ry="4.5" fill="#aed581" transform="rotate(25 670 350)" />
+
+                        <!-- 4. 点缀几朵小山花，呼应后文的落花 -->
+                        <circle cx="585" cy="335" r="4" fill="#f48fb1" />
+                        <circle cx="645" cy="340" r="3.5" fill="#f06292" />
+                        <circle cx="715" cy="325" r="5" fill="#f8bbd0" />
+                        <!-- 新增点缀 -->
+                        <circle cx="475" cy="355" r="4" fill="#f8bbd0" />
+                        <circle cx="805" cy="345" r="4.5" fill="#f48fb1" />
+                        <circle cx="535" cy="365" r="3.5" fill="#f06292" />
+
+                        <!-- 闪光点 (春光) -->
+                        <path d="M620,320 L625,335 L640,340 L625,345 L620,360 L615,345 L600,340 L615,335 Z" fill="#FFF" class="sparkle-fx" />
+                        <path d="M700,340 L703,348 L711,351 L703,354 L700,362 L697,354 L689,351 L697,348 Z" fill="#FFF" class="sparkle-fx" style="animation-delay: 1s;" />
+                        <path d="M500,360 L502,365 L507,366 L502,367 L500,372 L498,367 L493,366 L498,365 Z" fill="#FFF" class="sparkle-fx" style="animation-delay: 0.5s;" />
+                        
+                        <!-- 标签位置微调 -->
+                        <foreignObject id="scene1-flowers-tag" x="620" y="370" width="80" height="40" class="active-scene">
+                            <div class="poem-tag text-center">春光</div>
+                        </foreignObject>
+                    </g>
+
+                    <!-- 一条小河 (用于干扰衣桁的错误坑位) -->
+                    <path d="M600,420 Q700,390 850,420 L850,400 L600,390 Z" fill="#4dd0e1" opacity="0.6" />
+                    <foreignObject id="dropzone-river" x="700" y="380" width="100" height="50"><div class="w-full h-full"></div></foreignObject>
+                    
+                    <!-- 窗外的柳树 (Scene 3 重点) -->
+                    <!-- 新增的第二棵柳树 (靠后一点，丰富层次) -->
+                    <g id="willow-tree-2" transform="translate(260, 50) scale(0.85)">
+                        <path d="M35,-60 C50,90 35,180 25,420 L60,420 C60,180 75,90 60,-60 Z" fill="#4e342e" />
+                        <g class="willow-branch willow-sway" id="branch3" transform="translate(35, 10)" style="animation-delay: -1s;">
+                            <path d="M0,0 Q20,120 5,260" fill="none" stroke="#2e7d32" stroke-width="3" />
+                            <circle cx="10" cy="50" r="3.5" fill="#4caf50" />
+                            <circle cx="15" cy="120" r="3.5" fill="#4caf50" />
+                            <circle cx="10" cy="190" r="3.5" fill="#4caf50" />
+                        </g>
+                        <g class="willow-branch willow-sway" id="branch4" transform="translate(60, 30)" style="animation-delay: -3.5s;">
+                            <path d="M0,0 Q-15,100 15,220" fill="none" stroke="#1b5e20" stroke-width="4" />
+                            <circle cx="-5" cy="80" r="4.5" fill="#66bb6a" />
+                            <circle cx="5" cy="160" r="4.5" fill="#66bb6a" />
+                        </g>
+                    </g>
+
+                    <!-- 原有的第一棵柳树 -->
+                    <g id="willow-tree" transform="translate(180, 50) scale(1.05)">
+                        <path d="M45,-80 C60,100 40,200 30,360 L70,360 C70,200 90,100 75,-80 Z" fill="#5d4037" />
+                        <g class="willow-branch willow-sway" id="branch1" transform="translate(45, 0)">
+                            <path d="M0,0 Q30,150 10,320" fill="none" stroke="#388e3c" stroke-width="3" />
+                            <circle cx="10" cy="50" r="4" fill="#66bb6a" />
+                            <circle cx="20" cy="100" r="4" fill="#66bb6a" />
+                            <circle cx="15" cy="200" r="4" fill="#66bb6a" />
+                            <circle cx="10" cy="320" r="4" fill="#66bb6a" />
+                        </g>
+                        <g class="willow-branch willow-sway" id="branch2" transform="translate(75, 30)" style="animation-delay: -2s;">
+                            <path d="M0,0 Q-20,120 20,280" fill="none" stroke="#2e7d32" stroke-width="4" />
+                            <circle cx="-10" cy="60" r="5" fill="#4caf50" />
+                            <circle cx="-5" cy="150" r="5" fill="#4caf50" />
+                            <circle cx="10" cy="220" r="5" fill="#4caf50" />
+                        </g>
+                        <foreignObject id="willow-tag" x="-20" y="200" width="80" height="40" class="hidden-scene">
+                            <div class="poem-tag text-center cursor-pointer animate-pulse border-green-500 text-green-700">门柳(点我)</div>
+                        </foreignObject>
+                    </g>
+                    <!-- 柳树下方的正确区域 -->
+                    <foreignObject id="dropzone-willow" x="180" y="330" width="150" height="150"><div class="w-full h-full"></div></foreignObject>
+
+                    <!-- 2. 室内结构 (墙壁与窗户) 扩大窗户 -->
+                    <rect x="0" y="0" width="150" height="600" fill="#d7ccc8" opacity="0.95" />
+                    <rect x="850" y="0" width="150" height="600" fill="#d7ccc8" opacity="0.95" />
+                    <rect x="150" y="0" width="700" height="40" fill="#5d4037" />
+                    <rect x="150" y="420" width="700" height="180" fill="#d7ccc8" opacity="0.95" />
+                    <rect x="130" y="400" width="740" height="20" fill="#4e342e" /> <!-- 窗台木板 -->
+                    <rect x="150" y="40" width="20" height="360" fill="#5d4037" />
+                    <rect x="830" y="40" width="20" height="360" fill="#5d4037" />
+
+                    <!-- 3. 书桌与文房四宝 -->
+                    <g id="desk-area" transform="translate(350, 420)">
+                        <rect x="0" y="0" width="300" height="150" fill="#8d6e63" rx="8" />
+                        <rect x="10" y="10" width="280" height="130" fill="#795548" rx="4" />
+                        
+                        <rect x="30" y="20" width="100" height="100" fill="#fff3e0" transform="rotate(-2)" />
+                        <foreignObject id="dropzone-paper" x="30" y="20" width="100" height="100"><div class="w-full h-full"></div></foreignObject>
+                        <circle id="ink-drop" cx="80" cy="70" r="8" fill="#212121" opacity="0" class="transition-opacity duration-500" />
+
+                        <ellipse cx="230" cy="40" rx="30" ry="20" fill="#424242" />
+                        <ellipse cx="230" cy="40" rx="20" ry="12" fill="#212121" />
+
+                        <g transform="translate(180, 80)">
+                            <rect x="0" y="0" width="80" height="25" fill="#5d4037" rx="3" />
+                            <path d="M 20,0 L 20,5 L 30,5 L 30,0 Z" fill="#3e2723" />
+                            <path d="M 50,0 L 50,5 L 60,5 L 60,0 Z" fill="#3e2723" />
+                            <foreignObject id="bed-tag" x="0" y="30" width="80" height="40" class="hidden-scene">
+                                <div class="poem-tag text-center text-xs">笔床</div>
+                            </foreignObject>
+                        </g>
+                        <foreignObject id="dropzone-bed" x="170" y="70" width="100" height="50"><div class="w-full h-full"></div></foreignObject>
+                        
+                        <g id="scene4-petal" class="hidden-scene" transform="translate(210, -300)">
+                            <path d="M10,0 C15,0 20,5 20,10 C20,15 10,20 10,20 C10,20 0,15 0,10 C0,5 5,0 10,0 Z" fill="#f48fb1" opacity="0.9" transform="rotate(45) scale(1.5)"/>
+                        </g>
+                    </g>
+                </svg>
+
+                <!-- 场景1：风恬 动态花瓣 -->
+                <div id="scene1-falling" class="absolute top-0 left-0 w-full h-full pointer-events-none active-scene">
+                    <div class="absolute left-1/3 top-0 petal-fx flex flex-col items-center">
+                        <div class="poem-tag mb-1 text-xs">风恬</div>
+                        <svg viewBox="0 0 20 20" width="20" height="20">
+                            <path d="M10,0 C15,0 20,5 20,10 C20,15 10,20 10,20 C10,20 0,15 0,10 C0,5 5,0 10,0 Z" fill="#f48fb1" opacity="0.8"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 场景2：蝴蝶与蜜蜂 -->
+                <div id="scene2-bugs" class="absolute top-0 left-0 w-full h-full pointer-events-none hidden-scene z-10">
+                    <div id="bug-butterfly" class="absolute left-[40%] top-[55%] transition-all duration-1000">
+                        <div class="poem-tag absolute -top-8 -left-4 text-xs bug-label">戏蝶</div>
+                        <svg viewBox="-30 -30 60 60" width="50" height="50">
+                            <g class="bug-wing" fill="#ff9800">
+                                <path d="M0,0 Q-20,-20 -30,-10 Q-20,10 0,0" />
+                                <path d="M0,0 Q20,-20 30,-10 Q20,10 0,0" />
+                            </g>
+                            <ellipse cx="0" cy="0" rx="3" ry="12" fill="#5d4037" />
+                        </svg>
+                    </div>
+                    <div id="bug-bee" class="absolute left-[55%] top-[58%] transition-all duration-1000">
+                        <div class="poem-tag absolute -top-8 -left-4 text-xs bug-label">游蜂</div>
+                        <svg viewBox="-20 -20 40 40" width="40" height="40">
+                            <ellipse cx="0" cy="0" rx="12" ry="8" fill="#FFC107" />
+                            <path d="M-6,-8 L-6,8 M0,-8 L0,8 M6,-8 L6,8" stroke="#3E2723" stroke-width="2" />
+                            <circle cx="-10" cy="-2" r="2" fill="#212121" />
+                            <g class="bug-wing" fill="#B3E5FC" opacity="0.7">
+                                <ellipse cx="0" cy="-10" rx="5" ry="8" transform="rotate(-30)" />
+                                <ellipse cx="8" cy="-10" rx="5" ry="8" transform="rotate(30)" />
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 场景3/4的绝对定位拖拽物 (移到这里，作为 canvas-wrapper 的直接子元素，避免被 interactive-area 的 overflow-hidden 裁剪) -->
+            <!-- 衣桁 -->
+            <div id="drag-yiheng" class="draggable hidden-scene" style="left: 10px; top: 10px;">
+                <svg viewBox="0 0 100 150" width="80" height="120">
+                    <rect x="10" y="20" width="8" height="130" fill="#6d4c41" />
+                    <rect x="82" y="20" width="8" height="130" fill="#6d4c41" />
+                    <rect x="0" y="20" width="100" height="12" fill="#4e342e" />
+                    <!-- 挂着的青色衣服 -->
+                    <path d="M 20,32 L 80,32 L 85,110 L 15,110 Z" fill="#00bcd4" opacity="0.8" />
+                </svg>
+            </div>
+
+            <!-- 毛笔 -->
+            <div id="drag-brush" class="draggable hidden-scene transition-transform duration-300" style="left: 55%; top: 75%;">
+                <svg viewBox="0 0 120 20" width="120" height="20" id="brush-svg">
+                    <path d="M 20,10 L 110,10" stroke="#4E342E" stroke-width="8" stroke-linecap="round" />
+                    <path d="M 20,10 Q 5,5 0,10 Q 5,15 20,10" fill="#212121" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- 下方控制与解说面板 -->
+        <div class="p-4 md:p-6 bg-white flex-1 flex flex-col justify-between">
+            <div id="lesson-content" class="min-h-[120px]">
+                <!-- 内容由JS动态填充 -->
+            </div>
+            <div id="action-buttons" class="mt-4 flex flex-wrap gap-4 justify-center items-center border-t pt-4">
+                <!-- 动态填充的交互按钮 -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button id="btn-prev" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 invisible">⬅ 上一句</button>
+                <div class="text-orange-400 font-bold text-sm">互动绘本 <span id="page-num">1</span>/4</div>
+                <button id="btn-next" class="px-6 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 shadow-lg shadow-orange-200">下一句 ➡</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 剧本数据
+        const scripts = [
+            {
+                scene: 1,
+                poem: "风恬日暖荡春光",
+                explainHtml: `
+                    <h3 class="text-xl font-bold text-orange-800 mb-2">🌿 导师解密：<span class="text-2xl bg-orange-100 px-2 rounded">荡</span></h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        “荡”就像我们在水里荡秋千一样。仔细观察窗外，你觉得在这个温暖的春天里，是什么在天地间“摇摆跳跃、荡漾”呢？
+                    </p>
+                `,
+                actionHtml: `<button onclick="showToast('太棒啦！是阳光和微风在天地间荡漾，充满了生机呢！')" class="bg-blue-100 border-2 border-blue-400 text-blue-700 px-4 py-2 rounded-xl font-bold hover:bg-blue-200">点我大声回答：是春光 and 微风！</button>`
+            },
+            {
+                scene: 2,
+                poem: "戏蝶游蜂乱入房",
+                explainHtml: `
+                    <h3 class="text-xl font-bold text-orange-800 mb-2">🦋 导师解密：<span class="text-2xl bg-orange-100 px-2 rounded">乱</span></h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        “乱”在这里可不是说房间被弄得乱七八糟哦！它是说蝴蝶和蜜蜂数量多，飞得特别欢快。看看窗台上的蝴蝶和蜜蜂，它们现在是在“乱入”吗？
+                    </p>
+                `,
+                actionHtml: `
+                    <button id="btn-quiet" class="bg-gray-100 border-2 border-gray-400 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-200">静静地就好</button>
+                    <button id="btn-chaos" class="bg-yellow-100 border-2 border-yellow-400 text-yellow-700 px-4 py-2 rounded-xl font-bold hover:bg-yellow-200">✨ 让他们乱入我的房间吧！</button>
+                `
+            },
+            {
+                scene: 3,
+                poem: "数枝门柳低衣桁",
+                explainHtml: `
+                    <h3 class="text-xl font-bold text-orange-800 mb-2">👘 导师解密：<span class="text-2xl bg-orange-100 px-2 rounded">衣桁 与 低</span></h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        “衣桁(héng)”是古人用来搭衣服的木架子。“低”是因为柳树的枝条太长，垂下来扫到了衣架。
+                        <br><span class="text-orange-600 font-bold">👉 互动任务：</span>请帮诗人把这个“衣桁”（拖拽它）放到正确的位置吧！
+                    </p>
+                `,
+                actionHtml: `<div id="yiheng-start-pos" class="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm">衣桁出发点</div>`
+            },
+            {
+                scene: 4,
+                poem: "一片山花落笔床",
+                explainHtml: `
+                    <h3 class="text-xl font-bold text-orange-800 mb-2">🖌️ 导师解密：<span class="text-2xl bg-orange-100 px-2 rounded">笔床</span></h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        “笔床”就是毛笔休息的小板凳。看，一片花瓣刚好落在了上面！
+                        <br><span class="text-orange-600 font-bold">👉 互动任务：</span>诗人的桌上有文房四宝，试着把毛笔拖到纸上写字，或者拖回“笔床”上休息吧。
+                    </p>
+                `,
+                actionHtml: ``
+            }
+        ];
+
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // DOM 元素获取
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const lessonContent = document.getElementById('lesson-content');
+        const actionButtons = document.getElementById('action-buttons');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const pageNum = document.getElementById('page-num');
+        const toast = document.getElementById('toast');
+
+        function updateScene() {
+            // 更新导航栏状态
+            navBtns.forEach((btn, idx) => {
+                if (idx + 1 === currentStep) {
+                    btn.className = "nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-orange-500 text-white shadow-md transform scale-110";
+                } else {
+                    btn.className = "nav-btn px-4 py-2 rounded-full font-bold text-sm transition-colors bg-white text-gray-500 border border-gray-300 hover:bg-orange-100";
+                }
+            });
+
+            const data = scripts[currentStep - 1];
+            lessonContent.innerHTML = data.explainHtml;
+            actionButtons.innerHTML = data.actionHtml;
+            pageNum.innerText = currentStep;
+
+            // 按钮可见性
+            btnPrev.classList.toggle('invisible', currentStep === 1);
+            if (currentStep === totalSteps) {
+                btnNext.innerText = "重新开始 ↺";
+            } else {
+                btnNext.innerText = "下一句 ➡";
+            }
+
+            // 处理具体的画面逻辑
+            applySceneVisuals(currentStep);
+        }
+
+        // 绑定底部导航按钮
+        btnPrev.addEventListener('click', () => {
+            if (currentStep > 1) { currentStep--; updateScene(); }
+        });
+        btnNext.addEventListener('click', () => {
+            if (currentStep < totalSteps) { 
+                currentStep++; updateScene(); 
+            } else {
+                currentStep = 1; updateScene();
+            }
+        });
+
+        // 绑定顶部导航按钮
+        navBtns.forEach((btn, idx) => {
+            btn.addEventListener('click', () => {
+                currentStep = idx + 1;
+                updateScene();
+            });
+        });
+
+        // Toast 提示框功能
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.style.opacity = 1;
+            setTimeout(() => { toast.style.opacity = 0; }, 3000);
+        }
+
+        function applySceneVisuals(step) {
+            // 重置所有隐藏/显示类
+            document.getElementById('scene1-sun-tag').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('scene1-flowers-tag').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('scene1-falling').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('scene2-bugs').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('willow-tag').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('drag-yiheng').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('scene4-petal').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('bed-tag').classList.replace('active-scene', 'hidden-scene');
+            document.getElementById('drag-brush').classList.replace('active-scene', 'hidden-scene');
+
+            // 停止蜜蜂蝴蝶的动画 (Scene 2清理)
+            const bugContainer = document.getElementById('scene2-bugs');
+            Array.from(bugContainer.children).forEach(bug => bug.classList.remove('flying'));
+            document.querySelectorAll('.extra-bug').forEach(e => e.remove());
+
+            if (step === 1) {
+                document.getElementById('scene1-sun-tag').classList.replace('hidden-scene', 'active-scene');
+                document.getElementById('scene1-flowers-tag').classList.replace('hidden-scene', 'active-scene');
+                document.getElementById('scene1-falling').classList.replace('hidden-scene', 'active-scene');
+            } 
+            else if (step === 2) {
+                document.getElementById('scene2-bugs').classList.replace('hidden-scene', 'active-scene');
+                
+                document.getElementById('btn-quiet').onclick = () => showToast("它们正安静地晒太阳呢。");
+                document.getElementById('btn-chaos').onclick = () => {
+                    document.getElementById('bug-butterfly').classList.add('flying');
+                    document.getElementById('bug-bee').classList.add('flying');
+                    document.querySelectorAll('.bug-label').forEach(el => el.style.display = 'none');
+                    
+                    for(let i=0; i<3; i++) {
+                        let isBee = Math.random() > 0.5;
+                        let clone = document.getElementById(isBee ? 'bug-bee' : 'bug-butterfly').cloneNode(true);
+                        clone.id = '';
+                        clone.className = 'absolute extra-bug flying';
+                        clone.style.left = (Math.random() * 80) + '%';
+                        clone.style.top = (Math.random() * 80) + '%';
+                        clone.style.animationDelay = `-${Math.random()*5}s`;
+                        bugContainer.appendChild(clone);
+                    }
+                    showToast("哇！这就叫‘乱入房’，太热闹啦！");
+                };
+            }
+            else if (step === 3) {
+                document.getElementById('willow-tag').classList.replace('hidden-scene', 'active-scene');
+                const yiheng = document.getElementById('drag-yiheng');
+                yiheng.classList.replace('hidden-scene', 'active-scene');
+                
+                setTimeout(() => {
+                    const startPos = document.getElementById('yiheng-start-pos');
+                    if(startPos) {
+                        const rect = startPos.getBoundingClientRect();
+                        const containerRect = document.getElementById('interactive-area').getBoundingClientRect();
+                        yiheng.style.left = (rect.left - containerRect.left + 5) + 'px';
+                        yiheng.style.top = (rect.top - containerRect.top + 5) + 'px';
+                    }
+                }, 100);
+
+                const willowTag = document.getElementById('willow-tag');
+                willowTag.onclick = () => {
+                    const b1 = document.getElementById('branch1');
+                    const b2 = document.getElementById('branch2');
+                    const b3 = document.getElementById('branch3');
+                    const b4 = document.getElementById('branch4');
+                    b1.style.transform = 'rotate(15deg)';
+                    b2.style.transform = 'rotate(15deg)';
+                    if(b3) b3.style.transform = 'rotate(15deg)';
+                    if(b4) b4.style.transform = 'rotate(15deg)';
+                    setTimeout(() => {
+                        b1.style.transform = '';
+                        b2.style.transform = '';
+                        if(b3) b3.style.transform = '';
+                        if(b4) b4.style.transform = '';
+                    }, 1000);
+                    showToast("柳枝垂下来啦！");
+                };
+            }
+            else if (step === 4) {
+                document.getElementById('bed-tag').classList.replace('active-scene', 'hidden-scene');
+                document.getElementById('bed-tag').classList.replace('hidden-scene', 'active-scene');
+                document.getElementById('drag-brush').classList.replace('hidden-scene', 'active-scene');
+                
+                const scene4Petal = document.getElementById('scene4-petal');
+                scene4Petal.classList.replace('hidden-scene', 'active-scene');
+                scene4Petal.style.transition = 'transform 2s ease-in';
+                void scene4Petal.offsetWidth; 
+                scene4Petal.style.transform = 'translate(210px, 80px)';
+                
+                showToast("仔细看，有一片山花刚好落在了笔床上呢！");
+            }
+        }
+
+        function makeDraggable(elId, targets, onDropResult) {
+            const el = document.getElementById(elId);
+            const container = document.getElementById('interactive-area');
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function onStart(e) {
+                if (el.classList.contains('hidden-scene')) return;
+                isDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX;
+                startY = clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+                el.style.zIndex = 100;
+                e.preventDefault();
+            }
+
+            function onMove(e) {
+                if (!isDragging) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                el.style.left = (initialLeft + dx) + 'px';
+                el.style.top = (initialTop + dy) + 'px';
+            }
+
+            function onEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                el.style.zIndex = 50;
+                
+                const elRect = el.getBoundingClientRect();
+                const elCenter = {
+                    x: elRect.left + elRect.width / 2,
+                    y: elRect.top + elRect.height / 2
+                };
+
+                let droppedOn = null;
+                for (const target of targets) {
+                    const tEl = document.getElementById(target.id);
+                    if(!tEl) continue;
+                    const tRect = tEl.getBoundingClientRect();
+                    if (elCenter.x > tRect.left && elCenter.x < tRect.right &&
+                        elCenter.y > tRect.top && elCenter.y < tRect.bottom) {
+                        droppedOn = target.id;
+                        break;
+                    }
+                }
+
+                const success = onDropResult(droppedOn, el);
+                
+                if(!success && elId === 'drag-yiheng') {
+                    el.style.left = initialLeft + 'px';
+                    el.style.top = initialTop + 'px';
+                }
+            }
+
+            el.addEventListener('mousedown', onStart);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+            
+            el.addEventListener('touchstart', onStart, {passive: false});
+            document.addEventListener('touchmove', onMove, {passive: false});
+            document.addEventListener('touchend', onEnd);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            makeDraggable('drag-yiheng', 
+                [{id: 'dropzone-willow'}, {id: 'dropzone-river'}], 
+                (droppedOn, el) => {
+                    if(currentStep !== 3) return false;
+                    if (droppedOn === 'dropzone-willow') {
+                        showToast("🎉 太棒了！‘数枝门柳低衣桁’，衣架就应该放在门前的柳树下！");
+                        document.getElementById('willow-tag').click();
+                        return true;
+                    } else if (droppedOn === 'dropzone-river') {
+                        showToast("哎呀，放在河边的话，衣服会被吹走的哦！仔细读诗：‘门柳’低衣桁。");
+                        return false;
+                    } else {
+                        showToast("数枝门柳低衣桁，应该放在柳树下哦！再试一次吧。");
+                        return false;
+                    }
+                }
+            );
+
+            makeDraggable('drag-brush',
+                [{id: 'dropzone-paper'}, {id: 'dropzone-bed'}],
+                (droppedOn, el) => {
+                    if(currentStep !== 4) return true;
+                    const svg = document.getElementById('brush-svg');
+                    const inkDrop = document.getElementById('ink-drop');
+
+                    if (droppedOn === 'dropzone-paper') {
+                        svg.style.transform = 'rotate(-60deg) translateX(-40px)';
+                        showToast("开始写字啦！你的字一定很漂亮！");
+                        inkDrop.style.opacity = 1;
+                        return true;
+                    } else if (droppedOn === 'dropzone-bed') {
+                        svg.style.transform = 'rotate(0deg)';
+                        showToast("毛笔回到‘笔床’上休息啦。");
+                        return true;
+                    } else {
+                        return true;
+                    }
+                }
+            );
+
+            updateScene();
+        });
+    </script>
+</body>
+</html>
