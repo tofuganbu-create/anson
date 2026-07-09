@@ -107,12 +107,31 @@
         </div>
     </div>
 
-    <!-- 古诗列表主区域 -->
-    <main class="w-full max-w-6xl mx-auto px-6 pb-20 relative z-10 flex-1">
-        <!-- 紧凑型卡片网格 -->
-        <div id="poems-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <!-- 动态渲染古诗卡片 -->
-        </div>
+    <!-- 列表主区域 -->
+    <main class="w-full max-w-6xl mx-auto px-6 pb-20 relative z-10 flex-1 flex flex-col gap-8">
+        
+        <!-- 经典古诗区域 -->
+        <section id="section-poetry" class="transition-all duration-300">
+            <div class="flex items-center space-x-2 mb-4 border-b border-emerald-100 pb-2">
+                <span class="text-xl">📖</span>
+                <h2 class="text-base font-bold text-emerald-800 font-child">经典古诗园</h2>
+            </div>
+            <div id="poetry-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- 动态渲染古诗卡片 -->
+            </div>
+        </section>
+
+        <!-- 趣味数学区域 -->
+        <section id="section-math" class="transition-all duration-300">
+            <div class="flex items-center space-x-2 mb-4 border-b border-indigo-100 pb-2">
+                <span class="text-xl">🧮</span>
+                <h2 class="text-base font-bold text-indigo-950 font-child">趣味数学空间</h2>
+            </div>
+            <div id="math-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- 动态渲染数学卡片 -->
+            </div>
+        </section>
+
     </main>
 
     <!-- 底部页脚 -->
@@ -132,7 +151,8 @@
                 snippet: "春苑月裴回，竹堂侵夜开。",
                 link: "chunye/index.html",
                 locked: false,
-                theme: "teal"
+                theme: "teal",
+                category: "poetry"
             },
             {
                 title: "春兴",
@@ -141,7 +161,8 @@
                 snippet: "杨柳阴阴细雨晴，残花落尽见流莺。",
                 link: "chunxing/index.html",
                 locked: false,
-                theme: "emerald"
+                theme: "emerald",
+                category: "poetry"
             },
             {
                 title: "春晴",
@@ -150,7 +171,8 @@
                 snippet: "雨前初见花间蕊，雨后兼无叶里花。",
                 link: "chunqing/index.html",
                 locked: false,
-                theme: "lime"
+                theme: "lime",
+                category: "poetry"
             },
             {
                 title: "山房春事",
@@ -159,7 +181,8 @@
                 snippet: "风恬日暖荡春光，戏蝶游蜂乱入房。",
                 link: "shanfangchunshi-01/index.html",
                 locked: false,
-                theme: "orange"
+                theme: "orange",
+                category: "poetry"
             },
             {
                 title: "停摆的闹钟",
@@ -168,7 +191,28 @@
                 snippet: "闹钟停摆了，看小明如何利用奇妙的数学计算把时间重新对齐！",
                 link: "maths/clock_demo.html",
                 locked: false,
-                theme: "indigo"
+                theme: "indigo",
+                category: "math"
+            },
+            {
+                title: "神奇的斐波那契",
+                author: "黄金比例",
+                dynasty: "数学",
+                snippet: "探索大自然植物树叶与花瓣背后的神秘卷形奥秘！",
+                link: "#",
+                locked: true,
+                theme: "blue",
+                category: "math"
+            },
+            {
+                title: "九宫格数独",
+                author: "逻辑推演",
+                dynasty: "数学",
+                snippet: "用数字和逻辑填满空格，开启小朋友的大脑智慧风暴！",
+                link: "#",
+                locked: true,
+                theme: "slate",
+                category: "math"
             },
             {
                 title: "春晓",
@@ -177,7 +221,8 @@
                 snippet: "春眠不觉晓，处处闻啼鸟。",
                 link: "#",
                 locked: true,
-                theme: "amber"
+                theme: "amber",
+                category: "poetry"
             },
             {
                 title: "咏鹅",
@@ -186,7 +231,8 @@
                 snippet: "鹅鹅鹅，曲项向天歌。",
                 link: "#",
                 locked: true,
-                theme: "blue"
+                theme: "blue",
+                category: "poetry"
             },
             {
                 title: "静夜思",
@@ -195,7 +241,8 @@
                 snippet: "床前明月光，疑是地上霜。",
                 link: "#",
                 locked: true,
-                theme: "indigo"
+                theme: "indigo",
+                category: "poetry"
             },
             {
                 title: "江雪",
@@ -204,7 +251,8 @@
                 snippet: "千山鸟飞绝，万径人踪灭。",
                 link: "#",
                 locked: true,
-                theme: "slate"
+                theme: "slate",
+                category: "poetry"
             },
             {
                 title: "登鹳雀楼",
@@ -213,7 +261,8 @@
                 snippet: "白日依山尽，黄河入海流。",
                 link: "#",
                 locked: true,
-                theme: "orange"
+                theme: "orange",
+                category: "poetry"
             },
             {
                 title: "悯农",
@@ -222,7 +271,8 @@
                 snippet: "锄禾日当午，汗滴禾下土。",
                 link: "#",
                 locked: true,
-                theme: "lime"
+                theme: "lime",
+                category: "poetry"
             }
         ];
 
@@ -230,11 +280,16 @@
 
         // 渲染核心逻辑
         function renderPoems(filterText = "", filterType = "all") {
-            const grid = document.getElementById('poems-grid');
-            grid.innerHTML = "";
+            const poetryGrid = document.getElementById('poetry-grid');
+            const mathGrid = document.getElementById('math-grid');
+            const poetrySection = document.getElementById('section-poetry');
+            const mathSection = document.getElementById('section-math');
+            
+            poetryGrid.innerHTML = "";
+            mathGrid.innerHTML = "";
             
             const filtered = poems.filter(poem => {
-                // 搜索文本过滤 (可匹配：题目、作者、朝代、古诗片段)
+                // 搜索文本过滤
                 const matchText = filterText.trim().toLowerCase();
                 const matchesSearch = !matchText || 
                     poem.title.toLowerCase().includes(matchText) ||
@@ -254,17 +309,31 @@
             });
 
             // 更新搜索统计
-            document.getElementById('stats-count').innerText = `${filtered.length} 首`;
+            document.getElementById('stats-count').innerText = `${filtered.length} 个`;
 
+            let emptyState = document.getElementById('empty-state');
             if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-16 text-center">
+                poetrySection.classList.add('hidden');
+                mathSection.classList.add('hidden');
+                if (!emptyState) {
+                    emptyState = document.createElement('div');
+                    emptyState.id = 'empty-state';
+                    emptyState.className = 'py-16 text-center w-full col-span-full';
+                    emptyState.innerHTML = `
                         <span class="text-5xl block mb-3">🔍</span>
-                        <p class="text-stone-400 font-child text-base">没有找到相关的古诗哦，换个词试试吧～</p>
-                    </div>
-                `;
+                        <p class="text-stone-400 font-child text-base">没有找到相关的项目哦，换个词试试吧～</p>
+                    `;
+                    document.querySelector('main').appendChild(emptyState);
+                } else {
+                    emptyState.style.display = 'block';
+                }
                 return;
+            } else {
+                if (emptyState) emptyState.style.display = 'none';
             }
+
+            let poetryCount = 0;
+            let mathCount = 0;
 
             // 循环生成卡片
             filtered.forEach(poem => {
@@ -317,8 +386,28 @@
                         </div>
                     `;
                 }
-                grid.appendChild(card);
+
+                if (poem.category === 'math') {
+                    mathGrid.appendChild(card);
+                    mathCount++;
+                } else {
+                    poetryGrid.appendChild(card);
+                    poetryCount++;
+                }
             });
+
+            // 动态控制Section的显隐
+            if (poetryCount > 0) {
+                poetrySection.classList.remove('hidden');
+            } else {
+                poetrySection.classList.add('hidden');
+            }
+
+            if (mathCount > 0) {
+                mathSection.classList.remove('hidden');
+            } else {
+                mathSection.classList.add('hidden');
+            }
         }
 
         // 切换过滤类别
